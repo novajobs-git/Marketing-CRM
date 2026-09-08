@@ -1,0 +1,197 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { InitialsAvatar } from "@/components/initials-avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  bulkArchiveCandidateProfiles,
+  bulkReassignCandidateProfiles,
+} from "@/app/(app)/candidates/actions";
+
+const UNASSIGN_VALUE = "__unassign__";
+
+const STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Active",
+  UNASSIGNED: "Unassigned",
+  ARCHIVED: "Archived",
+};
+
+export type ProfileRow = {
+  id: string;
+  name: string;
+  role: string;
+  status: string;
+  assignedRecruiter: { name: string } | null;
+};
+
+export function ProfilesTable({
+  profiles,
+  recruiters,
+}: {
+  profiles: ProfileRow[];
+  recruiters: { id: string; name: string }[];
+}) {
+  const router = useRouter();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [reassignTarget, setReassignTarget] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  const allSelected = profiles.length > 0 && selected.size === profiles.length;
+
+  function toggleAll() {
+    setSelected(allSelected ? new Set() : new Set(profiles.map((p) => p.id)));
+  }
+
+  function toggleOne(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function archiveSelected() {
+    startTransition(async () => {
+      await bulkArchiveCandidateProfiles([...selected]);
+      setSelected(new Set());
+      router.refresh();
+    });
+  }
+
+  function reassignSelected() {
+    if (!reassignTarget) return;
+    const recruiterId = reassignTarget === UNASSIGN_VALUE ? null : reassignTarget;
+    startTransition(async () => {
+      await bulkReassignCandidateProfiles([...selected], recruiterId);
+      setSelected(new Set());
+      setReassignTarget("");
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {selected.size > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 px-4 py-2">
+          <span className="text-sm text-foreground">{selected.size} selected</span>
+          <div className="flex items-center gap-2">
+            <Select value={reassignTarget} onValueChange={(v) => setReassignTarget(v ?? "")}>
+              <SelectTrigger className="w-44" size="sm">
+                <SelectValue placeholder="Reassign to…">
+                  {(v: string | null) =>
+                    v === UNASSIGN_VALUE
+                      ? "Unassign"
+                      : (recruiters.find((r) => r.id === v)?.name ?? "Reassign to…")
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={UNASSIGN_VALUE}>Unassign</SelectItem>
+                {recruiters.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pending || !reassignTarget}
+              onClick={reassignSelected}
+            >
+              {pending ? "Reassigning…" : "Reassign"}
+            </Button>
+            <Button variant="outline" size="sm" disabled={pending} onClick={archiveSelected}>
+              {pending ? "Archiving…" : "Archive selected"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-10">
+              <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+            </TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Assigned recruiter</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {profiles.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                No profiles match.
+              </TableCell>
+            </TableRow>
+          )}
+          {profiles.map((profile) => (
+            <TableRow key={profile.id} data-state={selected.has(profile.id) ? "selected" : undefined}>
+              <TableCell>
+                <Checkbox
+                  checked={selected.has(profile.id)}
+                  onCheckedChange={() => toggleOne(profile.id)}
+                  aria-label={`Select ${profile.name}`}
+                />
+              </TableCell>
+              <TableCell className="font-medium text-foreground">
+                <Link href={`/candidates/${profile.id}`} className="flex items-center gap-2">
+                  <InitialsAvatar name={profile.name} />
+                  {profile.name}
+                </Link>
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                <Link href={`/candidates/${profile.id}`} className="block">
+                  {profile.role}
+                </Link>
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                <Link href={`/candidates/${profile.id}`} className="flex items-center gap-2">
+                  {profile.assignedRecruiter ? (
+                    <>
+                      <InitialsAvatar name={profile.assignedRecruiter.name} />
+                      {profile.assignedRecruiter.name}
+                    </>
+                  ) : (
+                    "Unassigned"
+                  )}
+                </Link>
+              </TableCell>
+              <TableCell>
+                <Link href={`/candidates/${profile.id}`} className="block">
+                  <Badge variant={profile.status === "ARCHIVED" ? "outline" : "secondary"}>
+                    {STATUS_LABEL[profile.status]}
+                  </Badge>
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}

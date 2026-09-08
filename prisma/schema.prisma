@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  RECRUITER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProfileStatus {
+  ACTIVE
+  UNASSIGNED
+  ARCHIVED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  INTERVIEW
+  ASSESSMENT
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum IntakeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ChecklistLinkStatus {
+  PENDING
+  SUBMITTED
+  EXPIRED
+}
+
+/// FR-1.x — users authenticate via Clerk (Organizations: org:admin/org:member map to
+/// ADMIN/RECRUITER). This table is an identity *mirror*, not the source of truth for
+/// credentials — `id` is the Clerk user id (assigned explicitly, not DB-generated),
+/// kept in sync by the Clerk webhook route handler plus admin/users/actions.ts.
+model User {
+  id        String     @id
+  name      String
+  email     String     @unique
+  role      UserRole
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  assignedProfiles CandidateProfile[] @relation("AssignedRecruiter")
+  applications     Application[]      @relation("ApplicationCreatedBy")
+  reportEntries    ReportEntry[]      @relation("ReportCreatedBy")
+  reviewedIntakes  IntakeSubmission[] @relation("IntakeReviewedBy")
+  checklistTemplates ChecklistTemplate[] @relation("ChecklistTemplateCreatedBy")
+  checklistLinks     ChecklistLink[]     @relation("ChecklistLinkCreatedBy")
+
+  @@map("users")
+}
+
+/// FR-3.x — a candidate the agency is finding jobs for.
+/// Field set mirrors the org's real intake form (personal, professional,
+/// education, EEO) — see lib/candidate-fields.ts for the shared definitions.
+model CandidateProfile {
+  id                 String        @id @default(cuid())
+  name               String
+  role               String
+  address            String?
+  state              String?
+  zipCode            String?       @map("zip_code")
+  phone              String?
+  email              String?
+  dob                DateTime?     @db.Date
+  status             ProfileStatus @default(UNASSIGNED)
+  eeoAnswers         Json?
+  applicationQa      Json?
+  educationHistory   Json?         @map("education_history")
+  assignedRecruiterId String?      @map("assigned_recruiter_id")
+  assignedRecruiter  User?         @relation("AssignedRecruiter", fields: [assignedRecruiterId], references: [id])
+  archivedAt         DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  resumeFiles      ResumeFile[]
+  jobDescriptions  JobDescription[]
+  applications     Application[]
+  reportEntries    ReportEntry[]
+  intakeSubmission IntakeSubmission?
+  checklistLinks   ChecklistLink[]
+
+  @@index([assignedRecruiterId])
+  @@map("candidate_profiles")
+}
+
+/// A resume PDF on file for a candidate — either the base profile resume
+/// or a version tailored for one specific application (FR-6.x).
+model ResumeFile {
+  id                String   @id @default(cuid())
+  candidateId       String   @map("candidate_id")
+  candidate         CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  storageKey        String
+  filename          String
+  mimeType          String   @default("application/pdf")
+  sizeBytes         Int
+  isTailoredVersion Boolean  @default(false) @map("is_tailored_version")
+  uploadedById      String?  @map("uploaded_by_id")
+  uploadedAt        DateTime @default(now())
+
+  applications Application[]
+
+  @@index([candidateId])
+  @@map("resume_files")
+}
+
+/// FR-5.x — job description, stored as structured rich text (Tiptap JSON),
+/// one JD per application.
+model JobDescription {
+  id          String   @id @default(cuid())
+  candidateId String   @map("candidate_id")
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  content     Json
+  sourceNote  String?
+  createdAt   DateTime @default(now())
+
+  application Application?
+
+  @@index([candidateId])
+  @@map("job_descriptions")
+}
+
+/// FR-6.x — one logged application: a resume version + JD + status, tied
+/// to a candidate and the recruiter who logged it.
+model Application {
+  id               String            @id @default(cuid())
+  candidateId      String            @map("candidate_id")
+  candidate        CandidateProfile  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  resumeFileId     String            @map("resume_file_id")
+  resumeFile       ResumeFile        @relation(fields: [resumeFileId], references: [id])
+  jobDescriptionId String            @unique @map("job_description_id")
+  jobDescription   JobDescription    @relation(fields: [jobDescriptionId], references: [id])
+  status           ApplicationStatus @default(APPLIED)
+  appliedDate      DateTime          @default(now())
+  createdById      String            @map("created_by_id")
+  createdBy        User              @relation("ApplicationCreatedBy", fields: [createdById], references: [id])
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([candidateId])
+  @@index([status])
+  @@map("applications")
+}
+
+/// FR-8.x — daily/manual report entries, additive to counts derived from
+/// Application records. candidateId null = org-wide entry.
+model ReportEntry {
+  id               String   @id @default(cuid())
+  candidateId      String?  @map("candidate_id")
+  candidate        CandidateProfile? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  date             DateTime @db.Date
+  applicationsCount Int     @default(0) @map("applications_count")
+  interviewsCount   Int     @default(0) @map("interviews_count")
+  offersCount       Int     @default(0) @map("offers_count")
+  notes            String?
+  createdById      String   @map("created_by_id")
+  createdBy        User     @relation("ReportCreatedBy", fields: [createdById], references: [id])
+  createdAt        DateTime @default(now())
+
+  @@index([candidateId])
+  @@index([date])
+  @@map("report_entries")
+}
+
+/// FR-4.x — public intake form submissions, reviewed by an admin before
+/// becoming an active CandidateProfile.
+model IntakeSubmission {
+  id                String       @id @default(cuid())
+  submittedData     Json
+  status            IntakeStatus @default(PENDING)
+  resultingProfileId String?     @unique @map("resulting_profile_id")
+  resultingProfile  CandidateProfile? @relation(fields: [resultingProfileId], references: [id])
+  reviewedById      String?      @map("reviewed_by_id")
+  reviewedBy        User?        @relation("IntakeReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt        DateTime?
+  createdAt         DateTime     @default(now())
+
+  @@map("intake_submissions")
+}
+
+/// Admin-defined reusable set of candidate-detail fields to request via a
+/// public checklist link (e.g. "Full intake", "EEO update only").
+model ChecklistTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  fieldKeys   Json     @map("field_keys")
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ChecklistTemplateCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  links ChecklistLink[]
+
+  @@map("checklist_templates")
+}
+
+/// One single-use public link generated from a template for a specific
+/// candidate. `token` is the unguessable public identifier; the link stops
+/// accepting submissions once `status` leaves PENDING.
+model ChecklistLink {
+  id            String              @id @default(cuid())
+  token         String              @unique
+  templateId    String              @map("template_id")
+  template      ChecklistTemplate   @relation(fields: [templateId], references: [id])
+  candidateId   String              @map("candidate_id")
+  candidate     CandidateProfile    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  status        ChecklistLinkStatus @default(PENDING)
+  submittedData Json?               @map("submitted_data")
+  createdById   String              @map("created_by_id")
+  createdBy     User                @relation("ChecklistLinkCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime            @default(now())
+  submittedAt   DateTime?           @map("submitted_at")
+
+  @@index([token])
+  @@index([candidateId])
+  @@map("checklist_links")
+}

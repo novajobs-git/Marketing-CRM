@@ -1,0 +1,336 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
+/* Underlying @utility defs (status-focused-field, invalid-field-ring, no-highlight, scrollbar, etc.)
+   that input/date-input-group/calendar CSS below rely on via @apply. NOT @heroui/styles/variants —
+   that redefines the `dark` custom-variant and would collide with this project's own. `@utility` is
+   a special Tailwind at-rule that self-registers into the utilities layer regardless of import
+   context, so it doesn't need (and can't meaningfully use) `layer()` below. */
+@import "@heroui/styles/utilities";
+/*
+ * Every other HeroUI component stylesheet below is imported into Tailwind's own `components` layer
+ * (part of the standard `theme, base, components, utilities` layer order `@import "tailwindcss"`
+ * declares), NOT left unlayered. This matters: HeroUI's `.card`/`.input`/`.fieldset`/etc. classes
+ * bake in their own padding/gap/etc via `@apply` inside a plain (unlayered) stylesheet, and per the
+ * CSS Cascade Layers spec, ANY unlayered rule beats ANY layered rule regardless of source order or
+ * selector specificity — so a component's own `className="gap-6 p-8 ..."` override (which compiles
+ * into Tailwind's `utilities` layer) would silently lose to HeroUI's unlayered `gap-3`/`p-4` on the
+ * same element. Explicitly placing these imports in `components` (which sits below `utilities` in
+ * Tailwind's layer order) restores the expected "later/more specific override wins" behavior.
+ */
+@import "@heroui/styles/components/fieldset.css" layer(components);
+@import "@heroui/styles/components/input.css" layer(components);
+@import "@heroui/styles/components/label.css" layer(components);
+@import "@heroui/styles/components/date-field.css" layer(components);
+@import "@heroui/styles/components/date-picker.css" layer(components);
+@import "@heroui/styles/components/card.css" layer(components);
+/* calendar / calendar-year-picker / date-input-group forked (not verbatim) — see heroui-date-calendar.css header comment. */
+@import "./heroui-date-calendar.css" layer(components);
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-google-sans), -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "SF Pro Display", sans-serif;
+  --font-mono: var(--font-google-sans-code), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* status badges — muted/desaturated, per candidate application status */
+  --color-status-applied: var(--status-applied);
+  --color-status-applied-foreground: var(--status-applied-foreground);
+  --color-status-interview: var(--status-interview);
+  --color-status-interview-foreground: var(--status-interview-foreground);
+  --color-status-assessment: var(--status-assessment);
+  --color-status-assessment-foreground: var(--status-assessment-foreground);
+  --color-status-offer: var(--status-offer);
+  --color-status-offer-foreground: var(--status-offer-foreground);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-rejected-foreground: var(--status-rejected-foreground);
+  --color-status-withdrawn: var(--status-withdrawn);
+  --color-status-withdrawn-foreground: var(--status-withdrawn-foreground);
+
+  /* avatar palette — muted, deterministic per-person color */
+  --color-avatar-1: var(--avatar-1);
+  --color-avatar-1-foreground: var(--avatar-1-foreground);
+  --color-avatar-2: var(--avatar-2);
+  --color-avatar-2-foreground: var(--avatar-2-foreground);
+  --color-avatar-3: var(--avatar-3);
+  --color-avatar-3-foreground: var(--avatar-3-foreground);
+  --color-avatar-4: var(--avatar-4);
+  --color-avatar-4-foreground: var(--avatar-4-foreground);
+  --color-avatar-5: var(--avatar-5);
+  --color-avatar-5-foreground: var(--avatar-5-foreground);
+  --color-avatar-6: var(--avatar-6);
+  --color-avatar-6-foreground: var(--avatar-6-foreground);
+
+  /* radius scale — 8px controls (buttons/inputs), 12–16px cards */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+
+  /* HeroUI field/calendar utility mappings — see heroui-date-calendar.css and the
+     :root bridge block below for the raw values these resolve to. */
+  --color-field: var(--field-background);
+  --color-field-hover: var(--field-hover);
+  --color-field-foreground: var(--field-foreground);
+  --color-field-placeholder: var(--field-placeholder);
+  --shadow-field: none;
+  --radius-field: var(--radius-lg);
+
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-foreground: var(--danger-soft-foreground);
+
+  --color-focus: var(--focus);
+  --color-default: var(--default);
+  --color-default-foreground: var(--default-foreground);
+  --color-default-hover: var(--default-hover);
+
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+  --color-primary-soft-hover: var(--primary-soft-hover);
+
+  --color-overlay: var(--overlay);
+  --shadow-overlay: var(--overlay-shadow);
+  --ease-smooth: ease;
+
+  /* Card ("popup card") — surface = same floating-panel background as overlay/popover.
+     secondary/tertiary variants are unused (this app only uses the default variant) but
+     still need a resolvable token or Tailwind fails to compile card.css's variant rules. */
+  --color-surface: var(--surface);
+  --shadow-surface: var(--surface-shadow);
+  --color-surface-secondary: var(--muted);
+  --color-surface-tertiary: var(--secondary);
+}
+
+/* HeroUI bridge — raw values the mappings above resolve to. Derived from this
+   project's own palette (not HeroUI's default theme); resolves correctly under
+   .dark automatically since everything here is a var() reference, not a literal. */
+:root {
+  --focus: var(--ring);
+  --danger: var(--destructive);
+  --danger-foreground: var(--primary-foreground);
+  --danger-soft: color-mix(in oklab, var(--danger) 15%, transparent);
+  --danger-soft-foreground: color-mix(in oklab, var(--danger) 70%, var(--foreground) 30%);
+
+  --default: var(--secondary);
+  --default-foreground: var(--secondary-foreground);
+  --default-hover: color-mix(in oklab, var(--default) 96%, var(--default-foreground) 4%);
+
+  --primary-hover: color-mix(in oklab, var(--primary) 90%, var(--primary-foreground) 10%);
+  --primary-soft: color-mix(in oklab, var(--primary) 12%, transparent);
+  --primary-soft-foreground: color-mix(in oklab, var(--primary) 75%, var(--foreground) 25%);
+  --primary-soft-hover: color-mix(in oklab, var(--primary) 18%, transparent);
+
+  --overlay: var(--popover);
+  --overlay-shadow:
+    0 2px 8px 0 rgba(0, 0, 0, 0.06), 0 -6px 12px 0 rgba(0, 0, 0, 0.03),
+    0 14px 28px 0 rgba(0, 0, 0, 0.08);
+
+  --surface: var(--popover);
+  --surface-shadow: var(--overlay-shadow);
+
+  --field-background: transparent;
+  --field-hover: transparent;
+  --field-foreground: var(--foreground);
+  --field-placeholder: var(--muted-foreground);
+  --field-border: var(--input);
+  --field-border-hover: var(--input);
+  --field-border-focus: var(--ring);
+  --field-focus: transparent;
+  --border-width-field: 1px;
+  --color-field-border-invalid: var(--danger);
+
+  --cursor-interactive: pointer;
+  --cursor-disabled: not-allowed;
+  --disabled-opacity: 0.5;
+  --ring-offset-width: 2px;
+}
+
+:root {
+  --background: oklch(0.995 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* single restrained accent — iOS system blue */
+  --primary: oklch(0.55 0.211 260);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.96 0.02 260);
+  --accent-foreground: oklch(0.35 0.12 260);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.928 0 0);
+  --input: oklch(0.928 0 0);
+  --ring: oklch(0.55 0.211 260 / 50%);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.875rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.55 0.211 260);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.928 0 0);
+  --sidebar-ring: oklch(0.55 0.211 260 / 50%);
+
+  /* status badges — muted, desaturated (light) */
+  --status-applied: oklch(0.94 0.02 250);
+  --status-applied-foreground: oklch(0.4 0.09 250);
+  --status-interview: oklch(0.94 0.05 80);
+  --status-interview-foreground: oklch(0.42 0.1 70);
+  --status-assessment: oklch(0.94 0.03 300);
+  --status-assessment-foreground: oklch(0.42 0.1 300);
+  --status-offer: oklch(0.94 0.04 150);
+  --status-offer-foreground: oklch(0.4 0.1 150);
+  --status-rejected: oklch(0.94 0.03 25);
+  --status-rejected-foreground: oklch(0.45 0.12 25);
+  --status-withdrawn: oklch(0.94 0 0);
+  --status-withdrawn-foreground: oklch(0.46 0 0);
+
+  /* avatar palette (light) */
+  --avatar-1: oklch(0.9 0.05 250);
+  --avatar-1-foreground: oklch(0.4 0.12 250);
+  --avatar-2: oklch(0.9 0.06 25);
+  --avatar-2-foreground: oklch(0.45 0.14 25);
+  --avatar-3: oklch(0.9 0.06 150);
+  --avatar-3-foreground: oklch(0.4 0.11 150);
+  --avatar-4: oklch(0.91 0.07 80);
+  --avatar-4-foreground: oklch(0.42 0.12 70);
+  --avatar-5: oklch(0.9 0.06 300);
+  --avatar-5-foreground: oklch(0.42 0.12 300);
+  --avatar-6: oklch(0.9 0.05 190);
+  --avatar-6-foreground: oklch(0.4 0.1 190);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --primary: oklch(0.65 0.19 260);
+  --primary-foreground: oklch(0.145 0 0);
+
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.28 0.05 260);
+  --accent-foreground: oklch(0.85 0.08 260);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.65 0.19 260 / 50%);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.65 0.19 260);
+  --sidebar-primary-foreground: oklch(0.145 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.65 0.19 260 / 50%);
+
+  /* status badges — muted, desaturated (dark) */
+  --status-applied: oklch(0.3 0.05 250);
+  --status-applied-foreground: oklch(0.82 0.06 250);
+  --status-interview: oklch(0.32 0.06 80);
+  --status-interview-foreground: oklch(0.82 0.08 80);
+  --status-assessment: oklch(0.3 0.06 300);
+  --status-assessment-foreground: oklch(0.82 0.08 300);
+  --status-offer: oklch(0.3 0.06 150);
+  --status-offer-foreground: oklch(0.82 0.08 150);
+  --status-rejected: oklch(0.3 0.06 25);
+  --status-rejected-foreground: oklch(0.82 0.09 25);
+  --status-withdrawn: oklch(0.28 0 0);
+  --status-withdrawn-foreground: oklch(0.75 0 0);
+
+  /* avatar palette (dark) */
+  --avatar-1: oklch(0.32 0.07 250);
+  --avatar-1-foreground: oklch(0.84 0.07 250);
+  --avatar-2: oklch(0.33 0.08 25);
+  --avatar-2-foreground: oklch(0.84 0.09 25);
+  --avatar-3: oklch(0.32 0.07 150);
+  --avatar-3-foreground: oklch(0.83 0.08 150);
+  --avatar-4: oklch(0.34 0.08 80);
+  --avatar-4-foreground: oklch(0.85 0.09 80);
+  --avatar-5: oklch(0.32 0.07 300);
+  --avatar-5-foreground: oklch(0.84 0.08 300);
+  --avatar-6: oklch(0.32 0.06 190);
+  --avatar-6-foreground: oklch(0.83 0.07 190);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+
+  /* A native <legend> inside a display:flex <fieldset> doesn't reliably respect
+     the fieldset's flex `gap` to its next sibling (cross-browser <legend> layout
+     quirk) — Fieldset.Legend and Fieldset.Group end up touching. Explicit margin
+     instead of relying on gap; applies everywhere Fieldset is used (every popup). */
+  [data-slot="fieldset-legend"] {
+    @apply mb-2;
+  }
+}
