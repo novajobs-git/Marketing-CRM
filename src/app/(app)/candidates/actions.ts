@@ -16,24 +16,19 @@ import { createResumeFile } from "@/lib/repo/resume-files";
 import { requireAdmin } from "@/lib/auth";
 import { uploadObject } from "@/lib/storage";
 import { parseCandidateDetailForm, candidateDetailToDbFields } from "@/lib/candidate-form-schema";
+import { checkResumeFile } from "@/lib/file-validation";
 
 export type ActionState = { error?: string } | null;
-
-const MAX_RESUME_BYTES = 10 * 1024 * 1024; // 10MB
 
 async function validateResumeFile(formData: FormData, required: boolean) {
   const file = formData.get("resume");
   if (!(file instanceof File) || file.size === 0) {
-    if (required) return { error: "A resume PDF is required." } as const;
-    return { file: null } as const;
+    if (required) return { error: "A resume is required." } as const;
+    return { file: null, mimeType: null } as const;
   }
-  if (file.type !== "application/pdf") {
-    return { error: "Resume must be a PDF file." } as const;
-  }
-  if (file.size > MAX_RESUME_BYTES) {
-    return { error: "Resume must be smaller than 10MB." } as const;
-  }
-  return { file } as const;
+  const check = checkResumeFile(file);
+  if (!check.ok) return { error: check.error } as const;
+  return { file, mimeType: check.mimeType } as const;
 }
 
 // FR-3.1 — admin creates a candidate profile matching the org's full intake fields.
@@ -52,6 +47,7 @@ export async function createCandidateProfile(
   const resumeResult = await validateResumeFile(formData, true);
   if ("error" in resumeResult) return { error: resumeResult.error };
   const file = resumeResult.file!;
+  const mimeType = resumeResult.mimeType!;
 
   const assignedRecruiterId = (formData.get("assignedRecruiterId") as string) || null;
 
@@ -62,12 +58,12 @@ export async function createCandidateProfile(
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const storageKey = `candidates/${candidate.id}/${Date.now()}-${file.name}`;
-  await uploadObject(storageKey, buffer, file.type);
+  await uploadObject(storageKey, buffer, mimeType);
   await createResumeFile(client, {
     candidateId: candidate.id,
     storageKey,
     filename: file.name,
-    mimeType: file.type,
+    mimeType,
     sizeBytes: file.size,
     isTailoredVersion: false,
   });
@@ -107,12 +103,12 @@ export async function updateCandidateProfile(
     const file = resumeResult.file;
     const buffer = Buffer.from(await file.arrayBuffer());
     const storageKey = `candidates/${candidateId}/${Date.now()}-${file.name}`;
-    await uploadObject(storageKey, buffer, file.type);
+    await uploadObject(storageKey, buffer, resumeResult.mimeType);
     await createResumeFile(client, {
       candidateId,
       storageKey,
       filename: file.name,
-      mimeType: file.type,
+      mimeType: resumeResult.mimeType,
       sizeBytes: file.size,
       isTailoredVersion: false,
     });

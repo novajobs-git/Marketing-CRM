@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { findChecklistLinkByToken } from "@/lib/repo/checklists";
@@ -21,7 +22,15 @@ export default async function ChecklistPage({
   return (
     <main className="flex min-h-full flex-1 justify-center bg-background px-6 py-12">
       <div className="w-full max-w-2xl">
-        <div className="mb-8 text-center">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <Image
+            src="/nova-staffs-logo.png"
+            alt="Nova Staffs"
+            width={929}
+            height={268}
+            priority
+            className="mb-6 h-9 w-auto"
+          />
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             {link.template.name}
           </h1>

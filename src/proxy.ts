@@ -40,8 +40,8 @@ export const config = {
     /*
      * Match all paths except:
      * - Next internals (_next/static, _next/image)
-     * - static files (favicon, images, etc.)
+     * - static files (images, fonts, favicon, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|css|js|map|woff2?)$).*)",
   ],
 };

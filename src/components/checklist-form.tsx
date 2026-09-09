@@ -2,10 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DynamicFieldInput } from "@/components/dynamic-field-input";
+import { ResumeFileUpload } from "@/components/resume-file-upload";
+import { FieldGroup } from "@/components/ui/field";
 import {
   EducationHistoryFields,
   emptyEducationHistory,
@@ -31,21 +31,18 @@ export function ChecklistForm({ token, fields }: { token: string; fields: FieldD
         </Alert>
       )}
 
-      {scalarFields.map((field) => (
-        <DynamicFieldInput
-          key={field.key}
-          field={field}
-          value={values[field.key] ?? ""}
-          onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
-        />
-      ))}
+      <FieldGroup>
+        {scalarFields.map((field) => (
+          <DynamicFieldInput
+            key={field.key}
+            field={field}
+            value={values[field.key] ?? ""}
+            onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
+          />
+        ))}
 
-      {hasResume && (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="resume">Resume (PDF)</Label>
-          <Input id="resume" name="resume" type="file" accept="application/pdf" required />
-        </div>
-      )}
+        {hasResume && <ResumeFileUpload required />}
+      </FieldGroup>
 
       {hasEducation && (
         <EducationHistoryFields value={educationHistory} onChange={setEducationHistory} />

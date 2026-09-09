@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { LabeledSelect } from "@/components/labeled-select";
+import { ResumeFileUpload } from "@/components/resume-file-upload";
 import {
   EducationHistoryFields,
   emptyEducationHistory,
@@ -170,23 +171,10 @@ export function CandidateDetailFields({ defaultValues }: { defaultValues?: Candi
             defaultValue={defaultValues?.professionalDetails.preferredCitiesStates}
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="resume">
-            Resume (PDF){defaultValues?.existingResumeFilename ? " — replace" : ""}
-          </Label>
-          {defaultValues?.existingResumeFilename && (
-            <p className="text-xs text-muted-foreground">
-              Current file: {defaultValues.existingResumeFilename}. Leave blank to keep it.
-            </p>
-          )}
-          <Input
-            id="resume"
-            name="resume"
-            type="file"
-            accept="application/pdf"
-            required={!defaultValues?.existingResumeFilename}
-          />
-        </div>
+        <ResumeFileUpload
+          required={!defaultValues?.existingResumeFilename}
+          existingFilename={defaultValues?.existingResumeFilename}
+        />
         <div className="flex flex-col gap-2">
           <Label htmlFor="jobSearchPriorities">Job Search Priorities</Label>
           <p className="text-xs text-muted-foreground">Tell us what you&apos;re looking for in a new role</p>

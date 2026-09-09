@@ -1,10 +1,10 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { LabeledSelect } from "@/components/labeled-select";
+import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import type { FieldDef } from "@/lib/candidate-fields";
 
 /** Renders one scalar candidate field (everything except resume/education-history, which callers special-case). */
@@ -31,9 +31,9 @@ export function DynamicFieldInput({
 
   if (field.type === "textarea") {
     return (
-      <div className="flex flex-col gap-2">
-        <Label htmlFor={field.key}>{field.label}</Label>
-        {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      <Field>
+        <FieldLabel htmlFor={field.key}>{field.label}</FieldLabel>
+        {field.helpText && <FieldDescription>{field.helpText}</FieldDescription>}
         <Textarea
           id={field.key}
           name={field.key}
@@ -42,14 +42,14 @@ export function DynamicFieldInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
-      </div>
+      </Field>
     );
   }
 
   if (field.type === "date") {
     return (
-      <div className="flex flex-col gap-2">
-        {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      <Field>
+        {field.helpText && <FieldDescription>{field.helpText}</FieldDescription>}
         <DatePicker
           name={field.key}
           label={field.label}
@@ -57,14 +57,14 @@ export function DynamicFieldInput({
           value={value}
           onChange={(date) => onChange(date ? date.toString() : "")}
         />
-      </div>
+      </Field>
     );
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={field.key}>{field.label}</Label>
-      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+    <Field>
+      <FieldLabel htmlFor={field.key}>{field.label}</FieldLabel>
+      {field.helpText && <FieldDescription>{field.helpText}</FieldDescription>}
       <Input
         id={field.key}
         name={field.key}
@@ -73,6 +73,6 @@ export function DynamicFieldInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
-    </div>
+    </Field>
   );
 }

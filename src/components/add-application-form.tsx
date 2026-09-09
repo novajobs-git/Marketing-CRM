@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { JdEditor } from "@/components/jd-editor";
+import { ResumeFileUpload } from "@/components/resume-file-upload";
 import type { ActionState } from "@/app/(app)/candidates/[id]/applications/actions";
 
 const STATUS_OPTIONS = [
@@ -45,10 +46,7 @@ export function AddApplicationForm({
         </Alert>
       )}
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="resume">Tailored resume (PDF)</Label>
-        <Input id="resume" name="resume" type="file" accept="application/pdf" required />
-      </div>
+      <ResumeFileUpload label="Tailored resume" required />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="sourceNote">Company / role label (optional)</Label>

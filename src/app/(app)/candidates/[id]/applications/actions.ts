@@ -9,11 +9,10 @@ import { createApplicationViaRpc, findApplicationById, updateApplicationStatus a
 import { requireSession } from "@/lib/auth";
 import { canAccessCandidate } from "@/lib/authz";
 import { uploadObject } from "@/lib/storage";
+import { checkResumeFile } from "@/lib/file-validation";
 import type { JSONContent } from "@tiptap/react";
 
 export type ActionState = { error?: string } | null;
-
-const MAX_RESUME_BYTES = 10 * 1024 * 1024; // 10MB
 
 const STATUS_VALUES = [
   "APPLIED",
@@ -72,24 +71,20 @@ export async function createApplication(
 
   const file = formData.get("resume");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "A tailored resume PDF is required." };
+    return { error: "A tailored resume is required." };
   }
-  if (file.type !== "application/pdf") {
-    return { error: "Resume must be a PDF file." };
-  }
-  if (file.size > MAX_RESUME_BYTES) {
-    return { error: "Resume must be smaller than 10MB." };
-  }
+  const check = checkResumeFile(file);
+  if (!check.ok) return { error: check.error };
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const storageKey = `candidates/${candidateId}/applications/${Date.now()}-${file.name}`;
-  await uploadObject(storageKey, buffer, file.type);
+  await uploadObject(storageKey, buffer, check.mimeType);
 
   const applicationId = await createApplicationViaRpc(client, {
     candidateId,
     storageKey,
     filename: file.name,
-    mimeType: file.type,
+    mimeType: check.mimeType,
     sizeBytes: file.size,
     uploadedById: session.sub,
     jdContent: jdJson,

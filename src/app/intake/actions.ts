@@ -4,11 +4,10 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createIntakeSubmission } from "@/lib/repo/intake-submissions";
 import { uploadObject } from "@/lib/storage";
 import { parseCandidateDetailForm, candidateDetailToDbFields } from "@/lib/candidate-form-schema";
+import { checkResumeFile } from "@/lib/file-validation";
 import type { IntakeSubmittedData } from "@/lib/intake";
 
 export type IntakeActionState = { error?: string; success?: boolean } | null;
-
-const MAX_RESUME_BYTES = 10 * 1024 * 1024; // 10MB
 
 // FR-4.1/4.2 — public intake form submission, stored for admin review (FR-4.3).
 export async function submitIntake(
@@ -22,18 +21,14 @@ export async function submitIntake(
 
   const file = formData.get("resume");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "A resume PDF is required." };
+    return { error: "A resume is required." };
   }
-  if (file.type !== "application/pdf") {
-    return { error: "Resume must be a PDF file." };
-  }
-  if (file.size > MAX_RESUME_BYTES) {
-    return { error: "Resume must be smaller than 10MB." };
-  }
+  const check = checkResumeFile(file);
+  if (!check.ok) return { error: check.error };
 
   const storageKey = `intake/${Date.now()}-${file.name}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await uploadObject(storageKey, buffer, file.type);
+  await uploadObject(storageKey, buffer, check.mimeType);
 
   const fields = candidateDetailToDbFields(parsed.data);
 
@@ -52,7 +47,7 @@ export async function submitIntake(
     resume: {
       storageKey,
       filename: file.name,
-      mimeType: file.type,
+      mimeType: check.mimeType,
       sizeBytes: file.size,
     },
   };

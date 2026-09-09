@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { findChecklistLinkByToken, submitChecklistViaRpc } from "@/lib/repo/checklists";
 import { uploadObject } from "@/lib/storage";
+import { checkResumeFile } from "@/lib/file-validation";
 import { PROFESSIONAL_FIELDS, EEO_FIELDS } from "@/lib/candidate-fields";
 
 export type ActionState = { error?: string } | null;
@@ -11,7 +12,6 @@ export type ActionState = { error?: string } | null;
 const TOP_LEVEL_KEYS = new Set(["name", "role", "phone", "email", "dob", "address", "state", "zipCode"]);
 const PROFESSIONAL_KEYS = new Set(PROFESSIONAL_FIELDS.map((f) => f.key));
 const EEO_KEYS = new Set(EEO_FIELDS.map((f) => f.key));
-const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 
 // Single-use public submission — the link stops accepting further submissions
 // as soon as this succeeds (FR: "expires after submission"). No Clerk session
@@ -64,12 +64,12 @@ export async function submitChecklist(token: string, _prev: ActionState, formDat
   if (fieldKeys.includes("resume")) {
     const file = formData.get("resume");
     if (file instanceof File && file.size > 0) {
-      if (file.type !== "application/pdf") return { error: "Resume must be a PDF file." };
-      if (file.size > MAX_RESUME_BYTES) return { error: "Resume must be smaller than 10MB." };
+      const check = checkResumeFile(file);
+      if (!check.ok) return { error: check.error };
       const buffer = Buffer.from(await file.arrayBuffer());
       const storageKey = `candidates/${link.candidateId}/checklist/${Date.now()}-${file.name}`;
-      await uploadObject(storageKey, buffer, file.type);
-      newResume = { storageKey, filename: file.name, mimeType: file.type, sizeBytes: file.size };
+      await uploadObject(storageKey, buffer, check.mimeType);
+      newResume = { storageKey, filename: file.name, mimeType: check.mimeType, sizeBytes: file.size };
       submittedData.resume = { filename: file.name };
     }
   }
