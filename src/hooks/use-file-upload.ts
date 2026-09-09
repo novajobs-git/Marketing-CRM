@@ -255,15 +255,13 @@ export const useFileUpload = (
 
         const newFiles = !multiple ? validFiles : [...state.files, ...validFiles]
         syncNativeInputFiles(inputRef.current, newFiles)
+        onFilesChange?.(newFiles)
 
-        setState((prev) => {
-          onFilesChange?.(newFiles)
-          return {
-            ...prev,
-            files: newFiles,
-            errors,
-          }
-        })
+        setState((prev) => ({
+          ...prev,
+          files: newFiles,
+          errors,
+        }))
       } else if (errors.length > 0) {
         // Nothing valid was selected — clear the native input too, so a
         // rejected file (e.g. wrong type) can't still be submitted natively.
@@ -291,29 +289,27 @@ export const useFileUpload = (
 
   const removeFile = useCallback(
     (id: string) => {
-      setState((prev) => {
-        const fileToRemove = prev.files.find((file) => file.id === id)
-        if (
-          fileToRemove &&
-          fileToRemove.preview &&
-          fileToRemove.file instanceof File &&
-          fileToRemove.file.type.startsWith("image/")
-        ) {
-          URL.revokeObjectURL(fileToRemove.preview)
-        }
+      const fileToRemove = state.files.find((file) => file.id === id)
+      if (
+        fileToRemove &&
+        fileToRemove.preview &&
+        fileToRemove.file instanceof File &&
+        fileToRemove.file.type.startsWith("image/")
+      ) {
+        URL.revokeObjectURL(fileToRemove.preview)
+      }
 
-        const newFiles = prev.files.filter((file) => file.id !== id)
-        syncNativeInputFiles(inputRef.current, newFiles)
-        onFilesChange?.(newFiles)
+      const newFiles = state.files.filter((file) => file.id !== id)
+      syncNativeInputFiles(inputRef.current, newFiles)
+      onFilesChange?.(newFiles)
 
-        return {
-          ...prev,
-          files: newFiles,
-          errors: [],
-        }
-      })
+      setState((prev) => ({
+        ...prev,
+        files: newFiles,
+        errors: [],
+      }))
     },
-    [onFilesChange]
+    [state.files, onFilesChange]
   )
 
   const clearErrors = useCallback(() => {

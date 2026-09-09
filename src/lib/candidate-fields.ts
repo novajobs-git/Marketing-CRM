@@ -76,12 +76,12 @@ export const PERSONAL_FIELDS: readonly FieldDef[] = [
 // Professional details — top-level `role`, the rest live in `applicationQa` JSON.
 export const PROFESSIONAL_FIELDS: readonly FieldDef[] = [
   { key: "role", section: "professional", label: "Target Job Title", type: "text", required: true },
-  { key: "linkedin", section: "professional", label: "LinkedIn", type: "text", required: false },
+  { key: "linkedin", section: "professional", label: "LinkedIn", type: "text", required: true },
   { key: "topSkills", section: "professional", label: "Top 5 Skills", type: "textarea", required: true },
-  { key: "certifications", section: "professional", label: "Certifications", type: "textarea", required: false },
+  { key: "certifications", section: "professional", label: "Certifications", type: "textarea", required: true },
   { key: "drivingLicense", section: "professional", label: "Driving Licence", type: "select", required: true, options: YES_NO_OPTIONS },
   { key: "visaStatus", section: "professional", label: "Visa Status", type: "select", required: true, options: VISA_STATUS_OPTIONS },
-  { key: "eadEndDate", section: "professional", label: "EAD End Date", type: "date", required: false },
+  { key: "eadEndDate", section: "professional", label: "EAD End Date", type: "date", required: true },
   {
     key: "salaryExpectation",
     section: "professional",

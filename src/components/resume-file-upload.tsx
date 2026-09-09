@@ -14,14 +14,23 @@ export function ResumeFileUpload({
   required = false,
   existingFilename,
   className,
+  showRequiredError,
+  onPresenceChange,
 }: {
   name?: string;
   label?: string;
   required?: boolean;
   existingFilename?: string;
   className?: string;
+  /** Opt-in: when provided (even `false`), native browser validation is
+   *  suppressed for this field and a "This field is mandatory" message is
+   *  shown instead whenever true — used by forms that want a consistent
+   *  custom validation UX instead of the browser's default popup. */
+  showRequiredError?: boolean;
+  onPresenceChange?: (hasFile: boolean) => void;
 }) {
   const inputId = useId();
+  const useCustomValidation = showRequiredError !== undefined;
   const [
     { files, isDragging, errors },
     { removeFile, handleDragEnter, handleDragLeave, handleDragOver, handleDrop, openFileDialog, getInputProps },
@@ -29,9 +38,11 @@ export function ResumeFileUpload({
     accept: RESUME_ACCEPT,
     maxSize: RESUME_MAX_BYTES,
     multiple: false,
+    onFilesChange: (nextFiles) => onPresenceChange?.(nextFiles.length > 0),
   });
 
   const selected = files[0];
+  const isMissing = required && !existingFilename && !selected;
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
@@ -59,7 +70,11 @@ export function ResumeFileUpload({
         )}
       >
         <input
-          {...getInputProps({ id: inputId, name, required: required && !existingFilename })}
+          {...getInputProps({
+            id: inputId,
+            name,
+            required: useCustomValidation ? false : required && !existingFilename,
+          })}
           className="sr-only"
         />
 
@@ -97,6 +112,13 @@ export function ResumeFileUpload({
           </>
         )}
       </div>
+
+      {useCustomValidation && showRequiredError && isMissing && (
+        <div className="flex items-start gap-1.5 text-sm text-destructive">
+          <CircleAlertIcon className="mt-0.5 size-4 shrink-0" />
+          <p>This field is mandatory</p>
+        </div>
+      )}
 
       {errors.length > 0 && (
         <div className="flex items-start gap-1.5 text-sm text-destructive">
