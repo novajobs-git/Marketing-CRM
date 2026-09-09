@@ -5,8 +5,18 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { findApplicationById } from "@/lib/repo/applications";
 import { canAccessCandidate } from "@/lib/authz";
 import { ApplicationStatusSelect } from "@/components/application-status-select";
+import { Badge } from "@/components/ui/badge";
 import { JdViewer } from "@/components/jd-editor";
 import type { JSONContent } from "@tiptap/react";
+
+const APPLICATION_STATUS_LABEL: Record<string, string> = {
+  APPLIED: "Applied",
+  INTERVIEW: "Interview",
+  ASSESSMENT: "Assessment",
+  OFFER: "Offer",
+  REJECTED: "Rejected",
+  WITHDRAWN: "Withdrawn",
+};
 
 export default async function ApplicationDetailPage({
   params,
@@ -20,7 +30,9 @@ export default async function ApplicationDetailPage({
 
   const application = await findApplicationById(createSupabaseServerClient(), applicationId);
   if (!application || application.candidateId !== id) notFound();
-  if (!canAccessCandidate(session, application.candidate)) redirect("/dashboard");
+  // Every recruiter can view every application; changing its status stays
+  // scoped to admins/the assigned recruiter.
+  const canManage = canAccessCandidate(session, application.candidate);
 
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -41,7 +53,11 @@ export default async function ApplicationDetailPage({
           </p>
         </div>
         <div className="w-40">
-          <ApplicationStatusSelect applicationId={application.id} status={application.status} />
+          {canManage ? (
+            <ApplicationStatusSelect applicationId={application.id} status={application.status} />
+          ) : (
+            <Badge variant="secondary">{APPLICATION_STATUS_LABEL[application.status]}</Badge>
+          )}
         </div>
       </div>
 

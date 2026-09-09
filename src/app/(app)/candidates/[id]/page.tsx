@@ -33,6 +33,7 @@ import {
 import { ArchiveProfileButton } from "@/components/archive-profile-button";
 import { AddReportDialog } from "@/components/add-report-dialog";
 import { CopyButton } from "@/components/copy-button";
+import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -40,6 +41,38 @@ const STATUS_LABEL: Record<string, string> = {
   UNASSIGNED: "Unassigned",
   ARCHIVED: "Archived",
 };
+
+/** One label/value pair on the details tab — bold label, normal-weight value,
+ * with a copy button that appears on hover whenever there's a real value to copy. */
+function FieldRow({
+  label,
+  value,
+  multiline = false,
+  emptyText = "—",
+  className,
+}: {
+  label: string;
+  value: string | null | undefined;
+  multiline?: boolean;
+  emptyText?: string;
+  className?: string;
+}) {
+  const hasValue = Boolean(value && value.trim() && value !== "—");
+  return (
+    <div className={cn("group", className)}>
+      <dt className="text-xs font-semibold text-muted-foreground">{label}</dt>
+      <dd
+        className={cn(
+          "flex gap-1.5 text-sm font-normal text-foreground",
+          multiline ? "items-start whitespace-pre-line" : "items-center"
+        )}
+      >
+        <span>{hasValue ? value : emptyText}</span>
+        {hasValue && <CopyButton value={value as string} />}
+      </dd>
+    </div>
+  );
+}
 
 const APPLICATION_STATUS_LABEL: Record<string, string> = {
   APPLIED: "Applied",
@@ -66,7 +99,9 @@ export default async function CandidateDetailPage({
   const client = createSupabaseServerClient();
   const candidate = await findCandidateById(client, id);
   if (!candidate) notFound();
-  if (!canAccessCandidate(session, candidate)) redirect("/dashboard");
+  // Every recruiter can view every profile; logging activity (applications,
+  // reports) against it stays scoped to admins/the assigned recruiter.
+  const canManage = canAccessCandidate(session, candidate);
 
   const [resumeFiles, applications, reportEntries] = await Promise.all([
     listResumeFilesForCandidate(client, id),
@@ -128,109 +163,45 @@ export default async function CandidateDetailPage({
             <div className="rounded-2xl border border-border bg-card p-6">
               <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Personal details</h2>
               <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="group">
-                  <dt className="text-xs text-muted-foreground">Phone</dt>
-                  <dd className="flex items-center gap-1.5 text-sm text-foreground">
-                    {candidate.phone || "—"}
-                    {candidate.phone && <CopyButton value={candidate.phone} />}
-                  </dd>
-                </div>
-                <div className="group">
-                  <dt className="text-xs text-muted-foreground">Email</dt>
-                  <dd className="flex items-center gap-1.5 text-sm text-foreground">
-                    {candidate.email || "—"}
-                    {candidate.email && <CopyButton value={candidate.email} />}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">DOB</dt>
-                  <dd className="text-sm text-foreground">
-                    {candidate.dob ? candidate.dob.toLocaleDateString() : "—"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Assigned recruiter</dt>
-                  <dd className="text-sm text-foreground">
-                    {candidate.assignedRecruiter?.name ?? "Unassigned"}
-                  </dd>
-                </div>
-                <div className="group sm:col-span-2">
-                  <dt className="text-xs text-muted-foreground">Address</dt>
-                  <dd className="flex items-center gap-1.5 text-sm text-foreground">
-                    {(() => {
-                      const fullAddress = [candidate.address, candidate.state, candidate.zipCode]
-                        .filter(Boolean)
-                        .join(", ");
-                      return (
-                        <>
-                          {fullAddress || "—"}
-                          {fullAddress && <CopyButton value={fullAddress} />}
-                        </>
-                      );
-                    })()}
-                  </dd>
-                </div>
+                <FieldRow label="Phone" value={candidate.phone} />
+                <FieldRow label="Email" value={candidate.email} />
+                <FieldRow label="DOB" value={candidate.dob ? candidate.dob.toLocaleDateString() : null} />
+                <FieldRow
+                  label="Assigned recruiter"
+                  value={candidate.assignedRecruiter?.name}
+                  emptyText="Unassigned"
+                />
+                <FieldRow
+                  label="Address"
+                  value={[candidate.address, candidate.state, candidate.zipCode].filter(Boolean).join(", ")}
+                  className="sm:col-span-2"
+                />
               </dl>
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6">
               <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Professional details</h2>
               <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="group">
-                  <dt className="text-xs text-muted-foreground">LinkedIn</dt>
-                  <dd className="flex items-center gap-1.5 text-sm text-foreground">
-                    {qa?.linkedin || "—"}
-                    {qa?.linkedin && <CopyButton value={qa.linkedin} />}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Driving Licence</dt>
-                  <dd className="text-sm text-foreground">
-                    {optionLabel(YES_NO_OPTIONS, qa?.drivingLicense)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Visa Status</dt>
-                  <dd className="text-sm text-foreground">
-                    {optionLabel(VISA_STATUS_OPTIONS, qa?.visaStatus)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">EAD End Date</dt>
-                  <dd className="text-sm text-foreground">{qa?.eadEndDate || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Salary Expectation</dt>
-                  <dd className="text-sm text-foreground">{qa?.salaryExpectation || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Open to Relocate</dt>
-                  <dd className="text-sm text-foreground">
-                    {optionLabel(YES_NO_OPTIONS, qa?.openToRelocate)}
-                  </dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs text-muted-foreground">Top 5 Skills</dt>
-                  <dd className="text-sm text-foreground whitespace-pre-line">{qa?.topSkills || "—"}</dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs text-muted-foreground">Certifications</dt>
-                  <dd className="text-sm text-foreground whitespace-pre-line">
-                    {qa?.certifications || "—"}
-                  </dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs text-muted-foreground">Preferred Cities/States</dt>
-                  <dd className="text-sm text-foreground whitespace-pre-line">
-                    {qa?.preferredCitiesStates || "—"}
-                  </dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs text-muted-foreground">Job Search Priorities</dt>
-                  <dd className="text-sm text-foreground whitespace-pre-line">
-                    {qa?.jobSearchPriorities || "—"}
-                  </dd>
-                </div>
+                <FieldRow label="LinkedIn" value={qa?.linkedin} />
+                <FieldRow label="Driving Licence" value={optionLabel(YES_NO_OPTIONS, qa?.drivingLicense)} />
+                <FieldRow label="Visa Status" value={optionLabel(VISA_STATUS_OPTIONS, qa?.visaStatus)} />
+                <FieldRow label="EAD End Date" value={qa?.eadEndDate} />
+                <FieldRow label="Salary Expectation" value={qa?.salaryExpectation} />
+                <FieldRow label="Open to Relocate" value={optionLabel(YES_NO_OPTIONS, qa?.openToRelocate)} />
+                <FieldRow label="Top 5 Skills" value={qa?.topSkills} multiline className="sm:col-span-2" />
+                <FieldRow label="Certifications" value={qa?.certifications} multiline className="sm:col-span-2" />
+                <FieldRow
+                  label="Preferred Cities/States"
+                  value={qa?.preferredCitiesStates}
+                  multiline
+                  className="sm:col-span-2"
+                />
+                <FieldRow
+                  label="Job Search Priorities"
+                  value={qa?.jobSearchPriorities}
+                  multiline
+                  className="sm:col-span-2"
+                />
               </dl>
             </div>
 
@@ -266,28 +237,18 @@ export default async function CandidateDetailPage({
                   .filter((e) => e.school)
                   .map((entry, i) => (
                     <dl key={i} className="grid grid-cols-1 gap-3 border-t border-border pt-4 first:border-t-0 first:pt-0 sm:grid-cols-2">
-                      <div className="sm:col-span-2">
-                        <dt className="text-xs text-muted-foreground">School/University</dt>
-                        <dd className="text-sm text-foreground">{entry.school}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-xs text-muted-foreground">Degree</dt>
-                        <dd className="text-sm text-foreground">{entry.degree || "—"}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-xs text-muted-foreground">Major</dt>
-                        <dd className="text-sm text-foreground">{entry.major || "—"}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-xs text-muted-foreground">GPA</dt>
-                        <dd className="text-sm text-foreground">{entry.gpa || "—"}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-xs text-muted-foreground">Dates</dt>
-                        <dd className="text-sm text-foreground">
-                          {entry.startDate || "—"} – {entry.endDate || "—"}
-                        </dd>
-                      </div>
+                      <FieldRow label="School/University" value={entry.school} className="sm:col-span-2" />
+                      <FieldRow label="Degree" value={entry.degree} />
+                      <FieldRow label="Major" value={entry.major} />
+                      <FieldRow label="GPA" value={entry.gpa} />
+                      <FieldRow
+                        label="Dates"
+                        value={
+                          entry.startDate || entry.endDate
+                            ? `${entry.startDate || "—"} – ${entry.endDate || "—"}`
+                            : null
+                        }
+                      />
                     </dl>
                   ))}
               </div>
@@ -298,26 +259,13 @@ export default async function CandidateDetailPage({
                 EEO information
               </summary>
               <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs text-muted-foreground">Race</dt>
-                  <dd className="text-sm text-foreground">{optionLabel(RACE_OPTIONS, eeo?.race)}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Gender</dt>
-                  <dd className="text-sm text-foreground">{optionLabel(GENDER_OPTIONS, eeo?.gender)}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Veteran status</dt>
-                  <dd className="text-sm text-foreground">
-                    {optionLabel(VETERAN_STATUS_OPTIONS, eeo?.veteranStatus)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Disability status</dt>
-                  <dd className="text-sm text-foreground">
-                    {optionLabel(DISABILITY_STATUS_OPTIONS, eeo?.disabilityStatus)}
-                  </dd>
-                </div>
+                <FieldRow label="Race" value={optionLabel(RACE_OPTIONS, eeo?.race)} />
+                <FieldRow label="Gender" value={optionLabel(GENDER_OPTIONS, eeo?.gender)} />
+                <FieldRow label="Veteran status" value={optionLabel(VETERAN_STATUS_OPTIONS, eeo?.veteranStatus)} />
+                <FieldRow
+                  label="Disability status"
+                  value={optionLabel(DISABILITY_STATUS_OPTIONS, eeo?.disabilityStatus)}
+                />
               </dl>
             </details>
           </TabsContent>
@@ -327,14 +275,16 @@ export default async function CandidateDetailPage({
               <p className="text-sm text-muted-foreground">
                 Every tailored resume + job description pair logged for this candidate.
               </p>
-              <Button
-                size="sm"
-                nativeButton={false}
-                render={<Link href={`/candidates/${candidate.id}/applications/new`} />}
-              >
-                <Plus />
-                Add Application
-              </Button>
+              {canManage && (
+                <Button
+                  size="sm"
+                  nativeButton={false}
+                  render={<Link href={`/candidates/${candidate.id}/applications/new`} />}
+                >
+                  <Plus />
+                  Add Application
+                </Button>
+              )}
             </div>
 
             <div className="mt-4">
@@ -410,7 +360,7 @@ export default async function CandidateDetailPage({
                 >
                   View full reports
                 </Button>
-                <AddReportDialog candidateId={candidate.id} />
+                {canManage && <AddReportDialog candidateId={candidate.id} />}
               </div>
             </div>
 

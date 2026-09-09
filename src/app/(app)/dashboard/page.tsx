@@ -38,7 +38,7 @@ export default async function DashboardPage({
 
   const profiles = await listCandidates(client, {
     excludeStatus: "ARCHIVED",
-    assignedRecruiterId: session.role === "RECRUITER" ? session.sub : recruiter,
+    assignedRecruiterId: recruiter,
     search: q,
   });
 
@@ -55,9 +55,7 @@ export default async function DashboardPage({
         Welcome, {session.name}
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        {session.role === "ADMIN"
-          ? "Candidate profiles across the org, with live application activity."
-          : "Your assigned candidate profiles, with live application activity."}
+        Candidate profiles across the org, with live application activity.
       </p>
 
       {session.role === "ADMIN" && rollup.length > 0 && (
@@ -102,7 +100,7 @@ export default async function DashboardPage({
             <TableRow>
               <TableHead>Candidate</TableHead>
               <TableHead>Role</TableHead>
-              {session.role === "ADMIN" && <TableHead>Recruiter</TableHead>}
+              <TableHead>Recruiter</TableHead>
               <TableHead>Applications</TableHead>
               <TableHead>Interviews</TableHead>
               <TableHead>Assessments</TableHead>
@@ -112,13 +110,8 @@ export default async function DashboardPage({
           <TableBody>
             {profiles.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={session.role === "ADMIN" ? 7 : 6}
-                  className="py-10 text-center text-muted-foreground"
-                >
-                  {session.role === "ADMIN"
-                    ? "No candidate profiles match."
-                    : "No candidate profiles assigned to you yet."}
+                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                  No candidate profiles match.
                 </TableCell>
               </TableRow>
             )}
@@ -141,16 +134,14 @@ export default async function DashboardPage({
                       {profile.role}
                     </Link>
                   </TableCell>
-                  {session.role === "ADMIN" && (
-                    <TableCell className="text-muted-foreground">
-                      <span className="flex items-center gap-2">
-                        {profile.assignedRecruiter && (
-                          <InitialsAvatar name={profile.assignedRecruiter.name} />
-                        )}
-                        {profile.assignedRecruiter?.name ?? "Unassigned"}
-                      </span>
-                    </TableCell>
-                  )}
+                  <TableCell className="text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      {profile.assignedRecruiter && (
+                        <InitialsAvatar name={profile.assignedRecruiter.name} />
+                      )}
+                      {profile.assignedRecruiter?.name ?? "Unassigned"}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{c.applications}</TableCell>
                   <TableCell className="text-muted-foreground">{c.interviews}</TableCell>
                   <TableCell className="text-muted-foreground">{c.assessments}</TableCell>

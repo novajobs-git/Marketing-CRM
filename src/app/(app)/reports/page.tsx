@@ -36,13 +36,12 @@ export default async function ReportsPage({
   const { candidate: candidateId, recruiter, from, to } = await searchParams;
 
   const client = createSupabaseServerClient();
-  const assignedRecruiterId = session.role === "RECRUITER" ? session.sub : recruiter;
 
   let candidateIds: string[] | undefined;
   if (candidateId) {
     candidateIds = [candidateId];
-  } else if (assignedRecruiterId) {
-    const matching = await listCandidates(client, { assignedRecruiterId });
+  } else if (recruiter) {
+    const matching = await listCandidates(client, { assignedRecruiterId: recruiter });
     candidateIds = matching.map((c) => c.id);
   }
 
@@ -52,7 +51,7 @@ export default async function ReportsPage({
   const [reportEntries, applications, recruiters, candidateInfo] = await Promise.all([
     listReportEntriesFiltered(client, { candidateIds, from: fromDate, to: toDate }),
     listApplicationsFiltered(client, { candidateIds, from: fromDate, to: toDate }),
-    session.role === "ADMIN" ? listRecruiters(client) : Promise.resolve([]),
+    listRecruiters(client),
     candidateId ? findCandidateById(client, candidateId) : Promise.resolve(null),
   ]);
 
@@ -114,9 +113,7 @@ export default async function ReportsPage({
       <p className="mt-1 text-sm text-muted-foreground">
         {candidateInfo
           ? "Daily activity log for this candidate."
-          : session.role === "ADMIN"
-            ? "Org-wide daily activity, combining logged applications and manual report entries."
-            : "Daily activity across your assigned candidates."}
+          : "Org-wide daily activity, combining logged applications and manual report entries."}
       </p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -158,20 +155,18 @@ export default async function ReportsPage({
             </Link>
           </span>
         )}
-        {session.role === "ADMIN" && (
-          <select
-            name="recruiter"
-            defaultValue={recruiter ?? ""}
-            className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
-          >
-            <option value="">All recruiters</option>
-            {recruiters.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        )}
+        <select
+          name="recruiter"
+          defaultValue={recruiter ?? ""}
+          className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
+        >
+          <option value="">All recruiters</option>
+          {recruiters.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
         <DatePicker name="from" defaultValue={from} className="w-40" />
         <span className="text-sm text-muted-foreground">to</span>
         <DatePicker name="to" defaultValue={to} className="w-40" />
