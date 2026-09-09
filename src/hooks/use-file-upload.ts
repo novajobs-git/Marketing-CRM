@@ -59,6 +59,25 @@ export type FileUploadActions = {
   }
 }
 
+// The hook tracks selection purely in React state for the custom drag-drop UI,
+// but a native <input type="file"> only participates in form submission
+// (formData.get(name)) and the browser's own `required` check via its own
+// FileList — which JS can't assign directly except through DataTransfer.
+// Without this, drag-and-drop never reaches the real input at all, and even a
+// real click-based selection gets wiped by the value="" reset below.
+function syncNativeInputFiles(input: HTMLInputElement | null, files: FileWithPreview[]) {
+  if (!input) return
+  if (typeof DataTransfer === "undefined") {
+    input.value = ""
+    return
+  }
+  const dataTransfer = new DataTransfer()
+  for (const item of files) {
+    if (item.file instanceof File) dataTransfer.items.add(item.file)
+  }
+  input.files = dataTransfer.files
+}
+
 export const useFileUpload = (
   options: FileUploadOptions = {}
 ): [FileUploadState, FileUploadActions] => {
@@ -141,32 +160,27 @@ export const useFileUpload = (
   }, [])
 
   const clearFiles = useCallback(() => {
-    setState((prev) => {
-      // Clean up object URLs
-      for (const file of prev.files) {
-        if (
-          file.preview &&
-          file.file instanceof File &&
-          file.file.type.startsWith("image/")
-        ) {
-          URL.revokeObjectURL(file.preview)
-        }
+    // Clean up object URLs
+    for (const file of state.files) {
+      if (
+        file.preview &&
+        file.file instanceof File &&
+        file.file.type.startsWith("image/")
+      ) {
+        URL.revokeObjectURL(file.preview)
       }
+    }
 
-      if (inputRef.current) {
-        inputRef.current.value = ""
-      }
+    // Runs synchronously (not inside the setState updater below) so that code
+    // which follows a clearFiles() call in the same tick — e.g. addFiles
+    // re-populating the native input for single-file mode — isn't clobbered
+    // by this update being applied afterward, since React defers updater
+    // functions until the batch flushes.
+    syncNativeInputFiles(inputRef.current, [])
 
-      const newState = {
-        ...prev,
-        files: [],
-        errors: [],
-      }
-
-      onFilesChange?.(newState.files)
-      return newState
-    })
-  }, [onFilesChange])
+    setState((prev) => ({ ...prev, files: [], errors: [] }))
+    onFilesChange?.([])
+  }, [state.files, onFilesChange])
 
   const addFiles = useCallback(
     (newFiles: FileList | File[]) => {
@@ -239,10 +253,10 @@ export const useFileUpload = (
         // Call the onFilesAdded callback with the newly added valid files
         onFilesAdded?.(validFiles)
 
+        const newFiles = !multiple ? validFiles : [...state.files, ...validFiles]
+        syncNativeInputFiles(inputRef.current, newFiles)
+
         setState((prev) => {
-          const newFiles = !multiple
-            ? validFiles
-            : [...prev.files, ...validFiles]
           onFilesChange?.(newFiles)
           return {
             ...prev,
@@ -251,16 +265,14 @@ export const useFileUpload = (
           }
         })
       } else if (errors.length > 0) {
+        // Nothing valid was selected — clear the native input too, so a
+        // rejected file (e.g. wrong type) can't still be submitted natively.
+        syncNativeInputFiles(inputRef.current, [])
         onError?.(errors)
         setState((prev) => ({
           ...prev,
           errors,
         }))
-      }
-
-      // Reset input value after handling files
-      if (inputRef.current) {
-        inputRef.current.value = ""
       }
     },
     [
@@ -291,6 +303,7 @@ export const useFileUpload = (
         }
 
         const newFiles = prev.files.filter((file) => file.id !== id)
+        syncNativeInputFiles(inputRef.current, newFiles)
         onFilesChange?.(newFiles)
 
         return {
