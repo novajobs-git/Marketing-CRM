@@ -24,9 +24,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // FR-3.1/3.2 — creating and editing candidate profiles is admin-only.
-  const isAdminOnlyCandidateRoute =
-    pathname === "/candidates/new" || /^\/candidates\/[^/]+\/edit$/.test(pathname);
+  // FR-3.2 — editing candidate profiles is admin-only.
+  const isAdminOnlyCandidateRoute = /^\/candidates\/[^/]+\/edit$/.test(pathname);
 
   if ((pathname.startsWith("/admin") || isAdminOnlyCandidateRoute) && orgRole !== "org:admin") {
     return NextResponse.redirect(new URL("/dashboard", req.url));

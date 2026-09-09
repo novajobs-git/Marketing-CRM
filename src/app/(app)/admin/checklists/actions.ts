@@ -59,12 +59,12 @@ export async function deleteChecklistTemplate(templateId: string): Promise<void>
 
 const linkSchema = z.object({
   templateId: z.string().trim().min(1, "Choose a template."),
-  candidateId: z.string().trim().min(1, "Choose a candidate."),
 });
 
 export type CreateLinkState = { error?: string; url?: string } | null;
 
 // Single-use public link: stops accepting submissions once used (FR — "expires after submission").
+// Brings a brand-new candidate into the CRM — not tied to any existing profile.
 export async function createChecklistLink(
   _prev: CreateLinkState,
   formData: FormData
@@ -73,7 +73,6 @@ export async function createChecklistLink(
 
   const parsed = linkSchema.safeParse({
     templateId: formData.get("templateId"),
-    candidateId: formData.get("candidateId"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -84,7 +83,6 @@ export async function createChecklistLink(
   await createChecklistLinkRepo(createSupabaseServerClient(), {
     token,
     templateId: parsed.data.templateId,
-    candidateId: parsed.data.candidateId,
     createdById: admin.sub,
   });
 

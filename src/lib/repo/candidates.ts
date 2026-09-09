@@ -171,20 +171,6 @@ function toRow(fields: CandidateWriteFields) {
   };
 }
 
-export async function createCandidate(
-  client: SupabaseClient,
-  fields: CandidateWriteFields,
-  extra: { status: ProfileStatus; assignedRecruiterId: string | null }
-): Promise<{ id: string }> {
-  const res = await client
-    .from("candidate_profiles")
-    .insert({ ...toRow(fields), status: extra.status, assigned_recruiter_id: extra.assignedRecruiterId })
-    .select("id")
-    .single();
-  const data = throwIfError(res as never) as { id: string };
-  return data;
-}
-
 export async function updateCandidate(
   client: SupabaseClient,
   id: string,

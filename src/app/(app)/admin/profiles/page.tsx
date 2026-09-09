@@ -82,9 +82,9 @@ export default async function AdminProfilesPage({
                 : "All candidate profiles across the org."}
             </p>
           </div>
-          <Button size="sm" nativeButton={false} render={<Link href="/candidates/new" />}>
+          <Button size="sm" nativeButton={false} render={<Link href="/admin/checklists" />}>
             <Plus />
-            Add profile
+            Add candidate
           </Button>
         </div>
 

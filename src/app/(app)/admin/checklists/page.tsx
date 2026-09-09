@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listChecklistTemplates, listChecklistLinks } from "@/lib/repo/checklists";
-import { listCandidates } from "@/lib/repo/candidates";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -26,12 +27,9 @@ export default async function ChecklistsPage() {
   await requireAdmin();
 
   const client = createSupabaseServerClient();
-  const [templates, links, candidates] = await Promise.all([
+  const [templates, links] = await Promise.all([
     listChecklistTemplates(client),
     listChecklistLinks(client, { limit: 50 }),
-    listCandidates(client, { excludeStatus: "ARCHIVED" }).then((rows) =>
-      [...rows].sort((a, b) => a.name.localeCompare(b.name))
-    ),
   ]);
 
   const fieldLabel = new Map(ALL_FIELDS.map((f) => [f.key, f.label]));
@@ -42,14 +40,11 @@ export default async function ChecklistsPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">Checklists</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Reusable templates for one-time public links candidates fill out themselves.
+            One-time links that bring a new candidate into the CRM — they fill it out themselves.
           </p>
         </div>
         <div className="flex gap-2">
-          <CreateChecklistLinkDialog
-            templates={templates.map((t) => ({ id: t.id, name: t.name }))}
-            candidates={candidates}
-          />
+          <CreateChecklistLinkDialog templates={templates.map((t) => ({ id: t.id, name: t.name }))} />
           <CreateChecklistTemplateDialog />
         </div>
       </div>
@@ -60,7 +55,7 @@ export default async function ChecklistsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Fields</TableHead>
+              <TableHead>Extra fields</TableHead>
               <TableHead>Links sent</TableHead>
               <TableHead className="w-10" />
             </TableRow>
@@ -97,10 +92,10 @@ export default async function ChecklistsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Candidate</TableHead>
               <TableHead>Template</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
+              <TableHead className="w-24" />
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
@@ -114,8 +109,7 @@ export default async function ChecklistsPage() {
             )}
             {links.map((link) => (
               <TableRow key={link.id}>
-                <TableCell className="font-medium text-foreground">{link.candidate.name}</TableCell>
-                <TableCell className="text-muted-foreground">{link.template.name}</TableCell>
+                <TableCell className="font-medium text-foreground">{link.template.name}</TableCell>
                 <TableCell>
                   <Badge variant={link.status === "PENDING" ? "secondary" : "outline"}>
                     {LINK_STATUS_LABEL[link.status]}
@@ -123,6 +117,18 @@ export default async function ChecklistsPage() {
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {link.createdAt.toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {link.resultingIntakeSubmissionId && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      nativeButton={false}
+                      render={<Link href={`/admin/intake/${link.resultingIntakeSubmissionId}`} />}
+                    >
+                      Review
+                    </Button>
+                  )}
                 </TableCell>
                 <TableCell>
                   <DeleteChecklistButton kind="link" id={link.id} />

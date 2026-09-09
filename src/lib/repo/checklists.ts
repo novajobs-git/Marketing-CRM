@@ -16,13 +16,11 @@ export type ChecklistLinkWithRelations = {
   id: string;
   token: string;
   templateId: string;
-  candidateId: string;
   status: ChecklistLinkStatus;
-  submittedData: Record<string, unknown> | null;
+  resultingIntakeSubmissionId: string | null;
   createdById: string;
   createdAt: Date;
   submittedAt: Date | null;
-  candidate: { name: string };
   template: { name: string };
 };
 
@@ -81,7 +79,7 @@ export async function listChecklistLinks(
 ): Promise<ChecklistLinkWithRelations[]> {
   let query = client
     .from("checklist_links")
-    .select("*, candidate:candidate_profiles(name), template:checklist_templates(name)")
+    .select("*, template:checklist_templates(name)")
     .order("created_at", { ascending: false });
   if (opts.limit) query = query.limit(opts.limit);
   const res = await query;
@@ -89,38 +87,33 @@ export async function listChecklistLinks(
     id: string;
     token: string;
     template_id: string;
-    candidate_id: string;
     status: ChecklistLinkStatus;
-    submitted_data: Record<string, unknown> | null;
+    resulting_intake_submission_id: string | null;
     created_by_id: string;
     created_at: string;
     submitted_at: string | null;
-    candidate: { name: string } | null;
     template: { name: string } | null;
   }[];
   return data.map((row) => ({
     id: row.id,
     token: row.token,
     templateId: row.template_id,
-    candidateId: row.candidate_id,
     status: row.status,
-    submittedData: row.submitted_data,
+    resultingIntakeSubmissionId: row.resulting_intake_submission_id,
     createdById: row.created_by_id,
     createdAt: new Date(row.created_at),
     submittedAt: row.submitted_at ? new Date(row.submitted_at) : null,
-    candidate: row.candidate ?? { name: "" },
     template: row.template ?? { name: "" },
   }));
 }
 
 export async function createChecklistLink(
   client: SupabaseClient,
-  fields: { token: string; templateId: string; candidateId: string; createdById: string }
+  fields: { token: string; templateId: string; createdById: string }
 ): Promise<void> {
   const res = await client.from("checklist_links").insert({
     token: fields.token,
     template_id: fields.templateId,
-    candidate_id: fields.candidateId,
     created_by_id: fields.createdById,
   });
   throwIfError(res as never);
@@ -133,9 +126,7 @@ export async function deleteChecklistLink(client: SupabaseClient, id: string): P
 export type ChecklistLinkForPublicPage = {
   id: string;
   token: string;
-  candidateId: string;
   status: ChecklistLinkStatus;
-  candidate: { name: string; applicationQa: Record<string, unknown> | null; eeoAnswers: Record<string, unknown> | null };
   template: { fieldKeys: string[]; name: string };
 };
 
@@ -146,61 +137,36 @@ export async function findChecklistLinkByToken(
 ): Promise<ChecklistLinkForPublicPage | null> {
   const res = await client
     .from("checklist_links")
-    .select(
-      "id, token, candidate_id, status, candidate:candidate_profiles(name, application_qa, eeo_answers), template:checklist_templates(field_keys, name)"
-    )
+    .select("id, token, status, template:checklist_templates(field_keys, name)")
     .eq("token", token)
     .maybeSingle();
   const row = throwIfError(res as never) as {
     id: string;
     token: string;
-    candidate_id: string;
     status: ChecklistLinkStatus;
-    candidate: { name: string; application_qa: Record<string, unknown> | null; eeo_answers: Record<string, unknown> | null } | null;
     template: { field_keys: string[]; name: string } | null;
   } | null;
   if (!row) return null;
   return {
     id: row.id,
     token: row.token,
-    candidateId: row.candidate_id,
     status: row.status,
-    candidate: row.candidate
-      ? { name: row.candidate.name, applicationQa: row.candidate.application_qa, eeoAnswers: row.candidate.eeo_answers }
-      : { name: "", applicationQa: null, eeoAnswers: null },
     template: row.template
       ? { fieldKeys: row.template.field_keys, name: row.template.name }
       : { fieldKeys: [], name: "" },
   };
 }
 
-/** Public, no session — atomic via RPC, called through the service-role client. */
+/** Public, no session — atomic via RPC, called through the service-role client.
+ *  Creates a pending intake_submissions row (same review-then-approve path as
+ *  the public /intake form) rather than writing to candidate_profiles directly. */
 export async function submitChecklistViaRpc(
   client: SupabaseClient,
-  params: {
-    linkId: string;
-    topLevel: Record<string, string>;
-    applicationQa: Record<string, unknown> | null;
-    eeoAnswers: Record<string, unknown> | null;
-    educationHistory: unknown | null;
-    resumeStorageKey: string | null;
-    resumeFilename: string | null;
-    resumeMimeType: string | null;
-    resumeSizeBytes: number | null;
-    submittedData: Record<string, unknown>;
-  }
-): Promise<void> {
+  params: { linkId: string; submittedData: Record<string, unknown> }
+): Promise<string> {
   const res = await client.rpc("submit_checklist", {
     p_link_id: params.linkId,
-    p_top_level: params.topLevel,
-    p_application_qa: params.applicationQa,
-    p_eeo_answers: params.eeoAnswers,
-    p_education_history: params.educationHistory,
-    p_resume_storage_key: params.resumeStorageKey,
-    p_resume_filename: params.resumeFilename,
-    p_resume_mime_type: params.resumeMimeType,
-    p_resume_size_bytes: params.resumeSizeBytes,
     p_submitted_data: params.submittedData,
   });
-  throwIfError(res as never);
+  return throwIfError(res as never) as string;
 }

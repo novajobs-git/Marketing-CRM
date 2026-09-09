@@ -17,9 +17,9 @@ export function QuickAddMenu() {
         <Plus />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuItem render={<Link href="/candidates/new" />}>
+        <DropdownMenuItem render={<Link href="/admin/checklists" />}>
           <UserRoundPlus />
-          New candidate profile
+          Add candidate
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/admin/users" />}>
           <UserPlus />

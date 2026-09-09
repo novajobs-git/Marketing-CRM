@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Link2, Copy, Check } from "lucide-react";
+import { UserRoundPlus, Copy, Check } from "lucide-react";
 import { Fieldset } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,13 +18,7 @@ import { createChecklistLink, type CreateLinkState } from "@/app/(app)/admin/che
 
 type Option = { id: string; name: string };
 
-export function CreateChecklistLinkDialog({
-  templates,
-  candidates,
-}: {
-  templates: Option[];
-  candidates: Option[];
-}) {
+export function CreateChecklistLinkDialog({ templates }: { templates: Option[] }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [state, formAction, pending] = useActionState<CreateLinkState, FormData>(
@@ -42,15 +36,16 @@ export function CreateChecklistLinkDialog({
         if (!next) setCopied(false);
       }}
     >
-      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
-        <Link2 />
-        Generate link
+      <Button size="sm" onClick={() => setOpen(true)}>
+        <UserRoundPlus />
+        Add candidate
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Generate checklist link</DialogTitle>
+          <DialogTitle>Add candidate</DialogTitle>
           <DialogDescription>
-            Creates a one-time public link. It stops working as soon as the candidate submits.
+            Creates a one-time link for a new candidate to fill out and join the CRM. It stops
+            working as soon as they submit.
           </DialogDescription>
         </DialogHeader>
 
@@ -106,22 +101,6 @@ export function CreateChecklistLinkDialog({
                     {templates.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="candidateId">Candidate</Label>
-                  <select
-                    id="candidateId"
-                    name="candidateId"
-                    required
-                    className="h-9 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
-                  >
-                    <option value="">Select a candidate…</option>
-                    {candidates.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
                       </option>
                     ))}
                   </select>

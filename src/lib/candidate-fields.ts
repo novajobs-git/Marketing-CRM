@@ -145,6 +145,16 @@ export const ALL_FIELDS: readonly FieldDef[] = [
   ...EEO_FIELDS,
 ];
 
+// Every checklist link collects these regardless of which template it uses —
+// the minimum a submission needs to become a valid candidate profile once an
+// admin approves it (mirrors the public /intake form's required core fields).
+// A template only controls which ADDITIONAL fields also get requested.
+export const CHECKLIST_ALWAYS_INCLUDED_KEYS: readonly string[] = [
+  ...PERSONAL_FIELDS.map((f) => f.key),
+  "role",
+  "resume",
+];
+
 export type EeoAnswers = {
   gender: string;
   race: string;

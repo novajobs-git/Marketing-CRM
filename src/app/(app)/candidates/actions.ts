@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  createCandidate,
   updateCandidate,
   archiveCandidate,
   unarchiveCandidate,
@@ -29,47 +28,6 @@ async function validateResumeFile(formData: FormData, required: boolean) {
   const check = checkResumeFile(file);
   if (!check.ok) return { error: check.error } as const;
   return { file, mimeType: check.mimeType } as const;
-}
-
-// FR-3.1 — admin creates a candidate profile matching the org's full intake fields.
-export async function createCandidateProfile(
-  _prev: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  await requireAdmin();
-  const client = createSupabaseServerClient();
-
-  const parsed = parseCandidateDetailForm(formData);
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
-  }
-
-  const resumeResult = await validateResumeFile(formData, true);
-  if ("error" in resumeResult) return { error: resumeResult.error };
-  const file = resumeResult.file!;
-  const mimeType = resumeResult.mimeType!;
-
-  const assignedRecruiterId = (formData.get("assignedRecruiterId") as string) || null;
-
-  const candidate = await createCandidate(client, candidateDetailToDbFields(parsed.data), {
-    status: assignedRecruiterId ? "ACTIVE" : "UNASSIGNED",
-    assignedRecruiterId,
-  });
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const storageKey = `candidates/${candidate.id}/${Date.now()}-${file.name}`;
-  await uploadObject(storageKey, buffer, mimeType);
-  await createResumeFile(client, {
-    candidateId: candidate.id,
-    storageKey,
-    filename: file.name,
-    mimeType,
-    sizeBytes: file.size,
-    isTailoredVersion: false,
-  });
-
-  revalidatePath("/admin/profiles");
-  redirect(`/candidates/${candidate.id}`);
 }
 
 // FR-3.2 — admin edits any field, including reassigning the recruiter (FR-2.4).

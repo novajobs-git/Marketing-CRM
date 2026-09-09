@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { findChecklistLinkByToken } from "@/lib/repo/checklists";
-import { ALL_FIELDS } from "@/lib/candidate-fields";
+import { ALL_FIELDS, CHECKLIST_ALWAYS_INCLUDED_KEYS } from "@/lib/candidate-fields";
 import { ChecklistForm } from "@/components/checklist-form";
 
 export default async function ChecklistPage({
@@ -17,7 +17,9 @@ export default async function ChecklistPage({
   if (!link) notFound();
 
   const fieldKeys = link.template.fieldKeys ?? [];
-  const fields = ALL_FIELDS.filter((f) => fieldKeys.includes(f.key));
+  const fields = ALL_FIELDS.filter(
+    (f) => CHECKLIST_ALWAYS_INCLUDED_KEYS.includes(f.key) || fieldKeys.includes(f.key)
+  );
 
   return (
     <main className="flex min-h-full flex-1 justify-center bg-background px-6 py-12">
@@ -34,7 +36,9 @@ export default async function ChecklistPage({
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             {link.template.name}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">Hi {link.candidate.name} — please fill this out.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We&apos;re excited to learn more about you — please fill this out to join our candidate pool.
+          </p>
         </div>
 
         {link.status !== "PENDING" ? (
@@ -44,7 +48,7 @@ export default async function ChecklistPage({
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {link.status === "SUBMITTED"
-                ? "This information has been submitted. This link can't be used again — ask your recruiter for a new one if you need to make further changes."
+                ? "Your information has been submitted and is being reviewed. This link can't be used again."
                 : "This link is no longer active. Ask your recruiter for a new link."}
             </p>
           </div>

@@ -16,17 +16,20 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { ALL_FIELDS, type FieldDef } from "@/lib/candidate-fields";
+import { ALL_FIELDS, CHECKLIST_ALWAYS_INCLUDED_KEYS, type FieldDef } from "@/lib/candidate-fields";
 import { createChecklistTemplate, type ActionState } from "@/app/(app)/admin/checklists/actions";
 
-const SECTION_LABEL: Record<FieldDef["section"], string> = {
-  personal: "Personal details",
+const SECTION_LABEL: Partial<Record<FieldDef["section"], string>> = {
   professional: "Professional details",
   education: "Education",
   eeo: "EEO information",
 };
 
-const SECTIONS: FieldDef["section"][] = ["personal", "professional", "education", "eeo"];
+// Personal details, target job title, and resume are always collected on
+// every checklist link — a template only controls which ADDITIONAL fields
+// also get requested.
+const SELECTABLE_FIELDS = ALL_FIELDS.filter((f) => !CHECKLIST_ALWAYS_INCLUDED_KEYS.includes(f.key));
+const SECTIONS: FieldDef["section"][] = ["professional", "education", "eeo"];
 
 export function CreateChecklistTemplateDialog() {
   const [open, setOpen] = useState(false);
@@ -69,7 +72,8 @@ export function CreateChecklistTemplateDialog() {
         <DialogHeader>
           <DialogTitle>New checklist template</DialogTitle>
           <DialogDescription>
-            Choose which candidate-detail fields this template requests.
+            Personal details, target job title, and resume are always collected. Choose which
+            additional fields this template also requests.
           </DialogDescription>
         </DialogHeader>
 
@@ -96,7 +100,7 @@ export function CreateChecklistTemplateDialog() {
                 {SECTION_LABEL[section]}
               </Fieldset.Legend>
               <Fieldset.Group className="gap-1.5 space-y-0">
-                {ALL_FIELDS.filter((f) => f.section === section).map((field) => (
+                {SELECTABLE_FIELDS.filter((f) => f.section === section).map((field) => (
                   <label key={field.key} className="flex items-center gap-2 text-sm text-foreground">
                     <Checkbox
                       checked={selected.has(field.key)}
