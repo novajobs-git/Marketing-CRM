@@ -137,20 +137,18 @@ export default async function DashboardPage({
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    <Link href={`/candidates/${profile.id}`} className="block">
+                    <Link href={`/candidates/${profile.id}`} className="flex items-center">
                       {profile.role}
                     </Link>
                   </TableCell>
                   {session.role === "ADMIN" && (
                     <TableCell className="text-muted-foreground">
-                      {profile.assignedRecruiter ? (
-                        <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2">
+                        {profile.assignedRecruiter && (
                           <InitialsAvatar name={profile.assignedRecruiter.name} />
-                          {profile.assignedRecruiter.name}
-                        </span>
-                      ) : (
-                        "Unassigned"
-                      )}
+                        )}
+                        {profile.assignedRecruiter?.name ?? "Unassigned"}
+                      </span>
                     </TableCell>
                   )}
                   <TableCell className="text-muted-foreground">{c.applications}</TableCell>

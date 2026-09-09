@@ -165,7 +165,7 @@ export function ProfilesTable({
                 </Link>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                <Link href={`/candidates/${profile.id}`} className="block">
+                <Link href={`/candidates/${profile.id}`} className="flex items-center">
                   {profile.role}
                 </Link>
               </TableCell>
@@ -182,7 +182,7 @@ export function ProfilesTable({
                 </Link>
               </TableCell>
               <TableCell>
-                <Link href={`/candidates/${profile.id}`} className="block">
+                <Link href={`/candidates/${profile.id}`} className="flex items-center">
                   <Badge variant={profile.status === "ARCHIVED" ? "outline" : "secondary"}>
                     {STATUS_LABEL[profile.status]}
                   </Badge>
