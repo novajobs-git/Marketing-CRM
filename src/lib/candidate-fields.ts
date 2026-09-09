@@ -62,21 +62,34 @@ export const DISABILITY_STATUS_OPTIONS: readonly FieldOption[] = [
   { value: DECLINE, label: "Prefer not to say" },
 ];
 
-// Personal details — top-level CandidateProfile columns.
+export const US_STATE_OPTIONS: readonly FieldOption[] = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+  "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM",
+  "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA",
+  "WV", "WI", "WY",
+].map((abbr) => ({ value: abbr, label: abbr }));
+
+// Personal details — top-level CandidateProfile columns, plus a few
+// (addressLine2/city/github/otherLinks) that fold into the applicationQa
+// JSON blob since there's no dedicated column for them.
 export const PERSONAL_FIELDS: readonly FieldDef[] = [
   { key: "name", section: "personal", label: "Full Name", type: "text", required: true },
   { key: "phone", section: "personal", label: "Phone", type: "text", required: true },
   { key: "email", section: "personal", label: "Email", type: "text", required: true },
+  { key: "linkedin", section: "personal", label: "LinkedIn", type: "text", required: true },
+  { key: "github", section: "personal", label: "GitHub", type: "text", required: false },
   { key: "dob", section: "personal", label: "DOB", type: "date", required: true },
-  { key: "address", section: "personal", label: "Address", type: "text", required: true },
-  { key: "state", section: "personal", label: "State", type: "text", required: true },
+  { key: "otherLinks", section: "personal", label: "Any other links", type: "textarea", required: false },
+  { key: "address", section: "personal", label: "Address Line 1", type: "text", required: true },
+  { key: "addressLine2", section: "personal", label: "Address Line 2", type: "text", required: false },
+  { key: "city", section: "personal", label: "City", type: "text", required: true },
+  { key: "state", section: "personal", label: "State", type: "select", required: true, options: US_STATE_OPTIONS },
   { key: "zipCode", section: "personal", label: "Zip code", type: "text", required: true },
 ];
 
 // Professional details — top-level `role`, the rest live in `applicationQa` JSON.
 export const PROFESSIONAL_FIELDS: readonly FieldDef[] = [
   { key: "role", section: "professional", label: "Target Job Title", type: "text", required: true },
-  { key: "linkedin", section: "professional", label: "LinkedIn", type: "text", required: true },
   { key: "topSkills", section: "professional", label: "Top 5 Skills", type: "textarea", required: true },
   { key: "certifications", section: "professional", label: "Certifications", type: "textarea", required: true },
   { key: "drivingLicense", section: "professional", label: "Driving Licence", type: "select", required: true, options: YES_NO_OPTIONS },
@@ -155,6 +168,14 @@ export const CHECKLIST_ALWAYS_INCLUDED_KEYS: readonly string[] = [
   "resume",
 ];
 
+/** Resolves the actual set of fields a checklist link renders: the always-included
+ *  core fields plus whatever extra fields its template selected. */
+export function getChecklistFields(templateFieldKeys: readonly string[]): FieldDef[] {
+  return ALL_FIELDS.filter(
+    (f) => CHECKLIST_ALWAYS_INCLUDED_KEYS.includes(f.key) || templateFieldKeys.includes(f.key)
+  );
+}
+
 export type EeoAnswers = {
   gender: string;
   race: string;
@@ -173,6 +194,13 @@ export type ProfessionalDetails = {
   openToRelocate: string;
   preferredCitiesStates: string;
   jobSearchPriorities: string;
+  // Fold into this same flexible JSON blob rather than adding database
+  // columns — optional so existing intake/edit submissions (which never set
+  // these) still satisfy the type.
+  github?: string;
+  otherLinks?: string;
+  addressLine2?: string;
+  city?: string;
 };
 
 export function optionLabel(options: readonly FieldOption[] | undefined, value: string | undefined | null) {

@@ -72,6 +72,16 @@ export default async function IntakeReviewPage({
               <dd className="text-sm text-foreground">{data.applicationQa.linkedin || "—"}</dd>
             </div>
             <div>
+              <dt className="text-xs text-muted-foreground">GitHub</dt>
+              <dd className="text-sm text-foreground">{data.applicationQa.github || "—"}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-xs text-muted-foreground">Other links</dt>
+              <dd className="text-sm text-foreground whitespace-pre-line">
+                {data.applicationQa.otherLinks || "—"}
+              </dd>
+            </div>
+            <div>
               <dt className="text-xs text-muted-foreground">Driving Licence</dt>
               <dd className="text-sm text-foreground">
                 {optionLabel(YES_NO_OPTIONS, data.applicationQa.drivingLicense)}

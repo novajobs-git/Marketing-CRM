@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { findChecklistLinkByToken } from "@/lib/repo/checklists";
-import { ALL_FIELDS, CHECKLIST_ALWAYS_INCLUDED_KEYS } from "@/lib/candidate-fields";
+import { getChecklistFields } from "@/lib/candidate-fields";
 import { ChecklistForm } from "@/components/checklist-form";
 
 export default async function ChecklistPage({
@@ -16,10 +16,7 @@ export default async function ChecklistPage({
 
   if (!link) notFound();
 
-  const fieldKeys = link.template.fieldKeys ?? [];
-  const fields = ALL_FIELDS.filter(
-    (f) => CHECKLIST_ALWAYS_INCLUDED_KEYS.includes(f.key) || fieldKeys.includes(f.key)
-  );
+  const fields = getChecklistFields(link.template.fieldKeys ?? []);
 
   return (
     <main className="flex min-h-full flex-1 justify-center bg-background px-6 py-12">

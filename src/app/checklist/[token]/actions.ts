@@ -5,12 +5,14 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { findChecklistLinkByToken, submitChecklistViaRpc } from "@/lib/repo/checklists";
 import { uploadObject } from "@/lib/storage";
 import { checkResumeFile } from "@/lib/file-validation";
-import { PROFESSIONAL_FIELDS, EEO_FIELDS, CHECKLIST_ALWAYS_INCLUDED_KEYS } from "@/lib/candidate-fields";
+import { PROFESSIONAL_FIELDS, EEO_FIELDS, getChecklistFields } from "@/lib/candidate-fields";
 import type { IntakeSubmittedData } from "@/lib/intake";
 
 export type ActionState = { error?: string } | null;
 
-const TOP_LEVEL_KEYS = CHECKLIST_ALWAYS_INCLUDED_KEYS.filter((key) => key !== "resume");
+// Personal-section fields that don't map to a candidate_profiles column —
+// these fold into the applicationQa JSON blob alongside the professional ones.
+const EXTRA_PERSONAL_KEYS = ["linkedin", "github", "otherLinks", "addressLine2", "city"];
 
 function formString(formData: FormData, key: string): string {
   const raw = formData.get(key);
@@ -35,8 +37,12 @@ export async function submitChecklist(token: string, _prev: ActionState, formDat
     return { error: "This link has already been used and can no longer accept submissions." };
   }
 
-  for (const key of TOP_LEVEL_KEYS) {
-    if (!formString(formData, key)) return { error: "Please fill in all required fields." };
+  const fields = getChecklistFields(link.template.fieldKeys ?? []);
+  for (const field of fields) {
+    if (field.type === "file" || field.type === "education-history") continue;
+    if (field.required && !formString(formData, field.key)) {
+      return { error: "Please fill in all required fields." };
+    }
   }
 
   const file = formData.get("resume");
@@ -64,12 +70,19 @@ export async function submitChecklist(token: string, _prev: ActionState, formDat
     (f) => f.key
   );
   const applicationQa = Object.fromEntries(
-    professionalFieldKeys.map((key) => [key, formString(formData, key)])
+    [...EXTRA_PERSONAL_KEYS, ...professionalFieldKeys].map((key) => [key, formString(formData, key)])
   ) as IntakeSubmittedData["applicationQa"];
 
   const eeoAnswers = Object.fromEntries(
     EEO_FIELDS.map((f) => [f.key, formString(formData, f.key)])
   ) as IntakeSubmittedData["eeoAnswers"];
+
+  // No dedicated city/address-line-2 columns — fold them into the single
+  // `address` string the rest of the app already expects (the raw parts are
+  // still kept in applicationQa above for fidelity in the admin review page).
+  const address = [formString(formData, "address"), formString(formData, "addressLine2"), formString(formData, "city")]
+    .filter(Boolean)
+    .join(", ");
 
   const submittedData: IntakeSubmittedData = {
     name: formString(formData, "name"),
@@ -77,7 +90,7 @@ export async function submitChecklist(token: string, _prev: ActionState, formDat
     phone: formString(formData, "phone"),
     email: formString(formData, "email"),
     dob: formString(formData, "dob"),
-    address: formString(formData, "address"),
+    address,
     state: formString(formData, "state"),
     zipCode: formString(formData, "zipCode"),
     eeoAnswers,
