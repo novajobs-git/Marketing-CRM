@@ -241,8 +241,8 @@
   position: relative;
 }
 
-.calendar:has(.calendar-year-picker__year-grid) > [data-slot="calendar-grid"],
-.range-calendar:has(.calendar-year-picker__year-grid) > [data-slot="range-calendar-grid"] {
+.calendar:has(.calendar-year-picker__year-grid) [data-slot="calendar-grid"],
+.range-calendar:has(.calendar-year-picker__year-grid) [data-slot="range-calendar-grid"] {
   will-change: opacity;
   transition:
     opacity 150ms var(--ease-out),
@@ -250,9 +250,14 @@
   @apply motion-reduce:transition-none;
 }
 
-.calendar:has(.calendar-year-picker__year-grid[data-open="true"]) > [data-slot="calendar-grid"],
+/* Descendant (not direct-child) combinator above and below — calendar.tsx
+   wraps Grid/YearPickerGrid in an extra positioning <div>, so calendar-grid
+   is a grandchild of .calendar, not an immediate child. With `>` this rule
+   silently never matched, so the day grid stayed visible underneath the
+   open year picker instead of fading out. */
+.calendar:has(.calendar-year-picker__year-grid[data-open="true"]) [data-slot="calendar-grid"],
 .range-calendar:has(.calendar-year-picker__year-grid[data-open="true"])
-  > [data-slot="range-calendar-grid"] {
+  [data-slot="range-calendar-grid"] {
   @apply pointer-events-none opacity-0;
   visibility: hidden;
   transition:
