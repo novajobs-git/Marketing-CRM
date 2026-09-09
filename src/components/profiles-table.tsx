@@ -46,9 +46,13 @@ export type ProfileRow = {
 export function ProfilesTable({
   profiles,
   recruiters,
+  canManage = false,
 }: {
   profiles: ProfileRow[];
   recruiters: { id: string; name: string }[];
+  /** Bulk archive/reassign is an admin-only action — recruiters get a
+   *  read-only view of the same table (no checkboxes, no bulk-action bar). */
+  canManage?: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -91,7 +95,7 @@ export function ProfilesTable({
 
   return (
     <div className="flex flex-col gap-3">
-      {selected.size > 0 && (
+      {canManage && selected.size > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 px-4 py-2">
           <span className="text-sm text-foreground">{selected.size} selected</span>
           <div className="flex items-center gap-2">
@@ -132,9 +136,11 @@ export function ProfilesTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-10">
-              <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
-            </TableHead>
+            {canManage && (
+              <TableHead className="w-10">
+                <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+              </TableHead>
+            )}
             <TableHead>Name</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Assigned recruiter</TableHead>
@@ -144,20 +150,22 @@ export function ProfilesTable({
         <TableBody>
           {profiles.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+              <TableCell colSpan={canManage ? 5 : 4} className="py-10 text-center text-muted-foreground">
                 No profiles match.
               </TableCell>
             </TableRow>
           )}
           {profiles.map((profile) => (
             <TableRow key={profile.id} data-state={selected.has(profile.id) ? "selected" : undefined}>
-              <TableCell>
-                <Checkbox
-                  checked={selected.has(profile.id)}
-                  onCheckedChange={() => toggleOne(profile.id)}
-                  aria-label={`Select ${profile.name}`}
-                />
-              </TableCell>
+              {canManage && (
+                <TableCell>
+                  <Checkbox
+                    checked={selected.has(profile.id)}
+                    onCheckedChange={() => toggleOne(profile.id)}
+                    aria-label={`Select ${profile.name}`}
+                  />
+                </TableCell>
+              )}
               <TableCell className="font-medium text-foreground">
                 <Link href={`/candidates/${profile.id}`} className="flex items-center gap-2">
                   <InitialsAvatar name={profile.name} />

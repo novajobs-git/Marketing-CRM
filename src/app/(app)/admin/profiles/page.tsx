@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, Search, X } from "lucide-react";
-import { requireAdmin } from "@/lib/auth";
+import { requireSession } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listCandidates, countCandidatesByStatus, type ProfileStatus } from "@/lib/repo/candidates";
 import { findUserById, listRecruiters } from "@/lib/repo/users";
@@ -23,7 +23,8 @@ export default async function AdminProfilesPage({
 }: {
   searchParams: Promise<{ q?: string; view?: string; recruiter?: string }>;
 }) {
-  await requireAdmin();
+  const session = await requireSession();
+  const isAdmin = session.role === "ADMIN";
   const { q, recruiter, view: rawView } = await searchParams;
   const activeView = VIEWS.find((v) => v.key === rawView)?.key ?? "all";
 
@@ -41,7 +42,7 @@ export default async function AdminProfilesPage({
         { orderBy: "createdAt" }
       ),
       recruiter ? findUserById(client, recruiter) : null,
-      listPendingIntakeSubmissions(client),
+      isAdmin ? listPendingIntakeSubmissions(client) : Promise.resolve([]),
       countCandidatesByStatus(client, { assignedRecruiterId: recruiter }),
       listRecruiters(client, { status: "ACTIVE" }),
     ]);
@@ -82,13 +83,15 @@ export default async function AdminProfilesPage({
                 : "All candidate profiles across the org."}
             </p>
           </div>
-          <Button size="sm" nativeButton={false} render={<Link href="/admin/checklists" />}>
-            <Plus />
-            Add candidate
-          </Button>
+          {isAdmin && (
+            <Button size="sm" nativeButton={false} render={<Link href="/admin/checklists" />}>
+              <Plus />
+              Add candidate
+            </Button>
+          )}
         </div>
 
-        {pendingIntakes.length > 0 && (
+        {isAdmin && pendingIntakes.length > 0 && (
           <div className="mt-8 rounded-2xl border border-border bg-card p-6">
             <h2 className="text-base font-semibold text-foreground">
               Needs review — {pendingIntakes.length} pending intake
@@ -149,7 +152,7 @@ export default async function AdminProfilesPage({
         </form>
 
         <div className="mt-6">
-          <ProfilesTable profiles={profiles} recruiters={activeRecruiters} />
+          <ProfilesTable profiles={profiles} recruiters={activeRecruiters} canManage={isAdmin} />
         </div>
       </div>
     </div>

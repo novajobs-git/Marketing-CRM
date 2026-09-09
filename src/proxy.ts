@@ -26,8 +26,16 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // FR-3.2 — editing candidate profiles is admin-only.
   const isAdminOnlyCandidateRoute = /^\/candidates\/[^/]+\/edit$/.test(pathname);
+  // /admin/profiles is the full candidate-profiles listing — every recruiter
+  // can view it too (admin-only pieces within it, like bulk actions and the
+  // intake review queue, are gated inside the page itself). Everything else
+  // under /admin stays admin-only.
+  const isSharedAdminPath = pathname === "/admin/profiles" || pathname.startsWith("/admin/profiles/");
 
-  if ((pathname.startsWith("/admin") || isAdminOnlyCandidateRoute) && orgRole !== "org:admin") {
+  if (
+    ((pathname.startsWith("/admin") && !isSharedAdminPath) || isAdminOnlyCandidateRoute) &&
+    orgRole !== "org:admin"
+  ) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
