@@ -26,6 +26,7 @@ export function ViewsNav({
             <Link
               key={v.key}
               href={hrefFor(v.key)}
+              prefetch
               className={cn(
                 "shrink-0 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors",
                 active

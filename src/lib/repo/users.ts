@@ -44,13 +44,21 @@ function throwIfError<T>(res: { data: T; error: { message: string; code?: string
 }
 
 export async function findUserById(client: SupabaseClient, id: string): Promise<AppUser | null> {
-  const res = await client.from("users").select("*").eq("id", id).maybeSingle();
+  const res = await client
+    .from("users")
+    .select("id, name, email, role, status, created_at, updated_at")
+    .eq("id", id)
+    .maybeSingle();
   const data = throwIfError(res as never) as UserRow | null;
   return data ? mapUser(data) : null;
 }
 
 export async function findUserByEmail(client: SupabaseClient, email: string): Promise<AppUser | null> {
-  const res = await client.from("users").select("*").eq("email", email).maybeSingle();
+  const res = await client
+    .from("users")
+    .select("id, name, email, role, status, created_at, updated_at")
+    .eq("email", email)
+    .maybeSingle();
   const data = throwIfError(res as never) as UserRow | null;
   return data ? mapUser(data) : null;
 }
@@ -79,7 +87,11 @@ export async function listRecruiters(
   client: SupabaseClient,
   opts: { status?: UserStatus } = {}
 ): Promise<AppUser[]> {
-  let query = client.from("users").select("*").eq("role", "RECRUITER").order("name", { ascending: true });
+  let query = client
+    .from("users")
+    .select("id, name, email, role, status, created_at, updated_at")
+    .eq("role", "RECRUITER")
+    .order("name", { ascending: true });
   if (opts.status) query = query.eq("status", opts.status);
   const res = await query;
   const data = throwIfError(res as never) as UserRow[];

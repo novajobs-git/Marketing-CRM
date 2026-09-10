@@ -229,7 +229,7 @@ export function ChecklistForm({ token, fields }: { token: string; fields: FieldD
 
         {isLastSection ? (
           <Button type="submit" size="lg" disabled={pending}>
-            {pending ? "Submitting…" : "Submit"}
+            {pending ? <Loader2Icon className="animate-spin" /> : "Submit"}
           </Button>
         ) : (
           <Button type="button" size="lg" onClick={() => void advance()} disabled={advancing}>

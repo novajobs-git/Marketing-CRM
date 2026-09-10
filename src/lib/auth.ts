@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { upsertUser, type UserRole } from "@/lib/repo/users";
+import { findUserById, upsertUser, type UserRole } from "@/lib/repo/users";
 
 /**
  * Kept identical in shape to the pre-Clerk JWT payload so every existing
@@ -55,7 +55,22 @@ export const getSession = cache(async (): Promise<SessionPayload | null> => {
   // confirmed their org role, so ACTIVE is always correct here — a banned
   // user can't reach this line at all, since Clerk itself blocks their
   // sign-in before a session ever exists.
-  await upsertUser(supabaseAdmin, { id: userId, name, email, role, status: "ACTIVE" });
+  //
+  // getSession() runs on every request, so writing unconditionally here means
+  // every single page load did an upsert even though the row is already
+  // correct the overwhelming majority of the time. Reading first and only
+  // writing on an actual mismatch turns that into a plain indexed lookup in
+  // the common case, avoiding the extra write-path cost (WAL, index upkeep)
+  // on every navigation.
+  const existing = await findUserById(supabaseAdmin, userId);
+  const inSync =
+    existing?.name === name &&
+    existing?.email === email &&
+    existing?.role === role &&
+    existing?.status === "ACTIVE";
+  if (!inSync) {
+    await upsertUser(supabaseAdmin, { id: userId, name, email, role, status: "ACTIVE" });
+  }
 
   return { sub: userId, role, name, email };
 });

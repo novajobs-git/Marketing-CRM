@@ -54,8 +54,8 @@ export default async function ChecklistsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Extra fields</TableHead>
+              <TableHead className="w-[25%]">Name</TableHead>
+              <TableHead className="w-[45%]">Extra fields</TableHead>
               <TableHead>Links sent</TableHead>
               <TableHead className="w-10" />
             </TableRow>
@@ -92,7 +92,7 @@ export default async function ChecklistsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Template</TableHead>
+              <TableHead className="w-[32%]">Template</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="w-24" />

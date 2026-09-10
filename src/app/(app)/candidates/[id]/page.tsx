@@ -60,10 +60,10 @@ function FieldRow({
   const hasValue = Boolean(value && value.trim() && value !== "—");
   return (
     <div className={cn("group", className)}>
-      <dt className="text-xs font-semibold text-muted-foreground">{label}</dt>
+      <dt className="text-sm font-bold text-foreground">{label}</dt>
       <dd
         className={cn(
-          "flex gap-1.5 text-sm font-normal text-foreground",
+          "flex gap-1.5 text-xs font-normal text-foreground",
           multiline ? "items-start whitespace-pre-line" : "items-center"
         )}
       >
@@ -90,11 +90,8 @@ export default async function CandidateDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const session = await getSession();
+  const [session, { id }, { tab }] = await Promise.all([getSession(), params, searchParams]);
   if (!session) redirect("/login");
-
-  const { id } = await params;
-  const { tab } = await searchParams;
 
   const client = createSupabaseServerClient();
   const candidate = await findCandidateById(client, id);
@@ -215,7 +212,6 @@ export default async function CandidateDetailPage({
                   <li key={resume.id} className="flex items-center justify-between">
                     <span className="text-sm text-foreground">{resume.filename}</span>
                     <Button
-                      variant="ghost"
                       size="sm"
                       nativeButton={false}
                       render={<a href={`/api/resumes/${resume.id}`} target="_blank" rel="noreferrer" />}
@@ -291,9 +287,9 @@ export default async function CandidateDetailPage({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Job description</TableHead>
-                    <TableHead>Resume</TableHead>
+                    <TableHead className="w-[18%]">Date</TableHead>
+                    <TableHead className="w-[38%]">Job description</TableHead>
+                    <TableHead className="w-[28%]">Resume</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -310,6 +306,7 @@ export default async function CandidateDetailPage({
                       <TableCell className="text-muted-foreground">
                         <Link
                           href={`/candidates/${candidate.id}/applications/${app.id}`}
+                          prefetch
                           className="block"
                         >
                           {app.appliedDate.toLocaleDateString()}
@@ -318,7 +315,8 @@ export default async function CandidateDetailPage({
                       <TableCell className="font-medium text-foreground">
                         <Link
                           href={`/candidates/${candidate.id}/applications/${app.id}`}
-                          className="block"
+                          prefetch
+                          className="block truncate"
                         >
                           {app.jobDescription.sourceNote || "Untitled"}
                         </Link>
@@ -326,7 +324,8 @@ export default async function CandidateDetailPage({
                       <TableCell className="text-muted-foreground">
                         <Link
                           href={`/candidates/${candidate.id}/applications/${app.id}`}
-                          className="block"
+                          prefetch
+                          className="block truncate"
                         >
                           {app.resumeFile.filename}
                         </Link>
@@ -334,6 +333,7 @@ export default async function CandidateDetailPage({
                       <TableCell>
                         <Link
                           href={`/candidates/${candidate.id}/applications/${app.id}`}
+                          prefetch
                           className="block"
                         >
                           <Badge variant="secondary">{APPLICATION_STATUS_LABEL[app.status]}</Badge>

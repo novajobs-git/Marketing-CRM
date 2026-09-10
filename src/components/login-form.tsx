@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useSignIn } from "@clerk/nextjs";
+import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -103,7 +104,7 @@ export function LoginForm({ next }: { next: string }) {
         </div>
 
         <Button type="submit" size="lg" className="mt-2 w-full" disabled={submitting}>
-          {submitting ? "Verifying…" : "Verify"}
+          {submitting ? <Loader2Icon className="animate-spin" /> : "Verify"}
         </Button>
       </form>
     );
@@ -144,7 +145,7 @@ export function LoginForm({ next }: { next: string }) {
       </div>
 
       <Button type="submit" size="lg" className="mt-2 w-full" disabled={submitting || !signIn}>
-        {submitting ? "Signing in…" : "Sign in"}
+        {submitting ? <Loader2Icon className="animate-spin" /> : "Sign in"}
       </Button>
     </form>
   );

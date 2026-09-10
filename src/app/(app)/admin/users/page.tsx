@@ -27,8 +27,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ view?: string }>;
 }) {
-  await requireAdmin();
-  const { view: rawView } = await searchParams;
+  const [, { view: rawView }] = await Promise.all([requireAdmin(), searchParams]);
   const activeView = VIEWS.find((v) => v.key === rawView)?.key ?? "all";
 
   const client = createSupabaseServerClient();
@@ -64,11 +63,11 @@ export default async function AdminUsersPage({
         </div>
 
         <div className="mt-8">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead className="w-[28%]">Name</TableHead>
+                <TableHead className="w-[30%]">Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Assigned profiles</TableHead>
                 <TableHead className="w-10" />
@@ -85,9 +84,9 @@ export default async function AdminUsersPage({
               {recruiters.map((recruiter) => (
                 <TableRow key={recruiter.id}>
                   <TableCell className="font-medium text-foreground">
-                    <span className="flex items-center gap-2">
+                    <span className="flex min-w-0 items-center gap-2">
                       <InitialsAvatar name={recruiter.name} />
-                      {recruiter.name}
+                      <span className="truncate">{recruiter.name}</span>
                     </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{recruiter.email}</TableCell>

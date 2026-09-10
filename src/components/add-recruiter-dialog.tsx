@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Loader2Icon } from "lucide-react";
 import { Fieldset } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,7 +83,7 @@ export function AddRecruiterDialog() {
 
           <DialogFooter>
             <Button type="submit" disabled={pending}>
-              {pending ? "Creating…" : "Create recruiter"}
+              {pending ? <Loader2Icon className="animate-spin" /> : "Create recruiter"}
             </Button>
           </DialogFooter>
         </form>

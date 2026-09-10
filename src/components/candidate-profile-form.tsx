@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -77,7 +78,7 @@ export function CandidateProfileForm({
 
       <div className="flex justify-end">
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
+          {pending ? <Loader2Icon className="animate-spin" /> : submitLabel}
         </Button>
       </div>
     </form>

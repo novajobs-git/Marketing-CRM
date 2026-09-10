@@ -11,10 +11,9 @@ export default async function NewApplicationPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await getSession();
+  const [session, { id }] = await Promise.all([getSession(), params]);
   if (!session) redirect("/login");
 
-  const { id } = await params;
   const candidate = await findCandidateById(createSupabaseServerClient(), id);
   if (!candidate) notFound();
   if (!canAccessCandidate(session, candidate)) redirect("/dashboard");

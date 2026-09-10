@@ -21,8 +21,7 @@ export default async function IntakeReviewPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
-  const { id } = await params;
+  const [, { id }] = await Promise.all([requireAdmin(), params]);
 
   const submission = await findIntakeSubmissionById(createSupabaseServerClient(), id);
   if (!submission) notFound();

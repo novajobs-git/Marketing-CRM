@@ -43,7 +43,7 @@ function mapIntakeSubmission(row: IntakeSubmissionRow): IntakeSubmission {
 export async function listPendingIntakeSubmissions(client: SupabaseClient): Promise<IntakeSubmission[]> {
   const res = await client
     .from("intake_submissions")
-    .select("*")
+    .select("id, submitted_data, status, resulting_profile_id, reviewed_by_id, reviewed_at, created_at")
     .eq("status", "PENDING")
     .order("created_at", { ascending: true });
   const data = throwIfError(res as never) as IntakeSubmissionRow[];
@@ -54,7 +54,11 @@ export async function findIntakeSubmissionById(
   client: SupabaseClient,
   id: string
 ): Promise<IntakeSubmission | null> {
-  const res = await client.from("intake_submissions").select("*").eq("id", id).maybeSingle();
+  const res = await client
+    .from("intake_submissions")
+    .select("id, submitted_data, status, resulting_profile_id, reviewed_by_id, reviewed_at, created_at")
+    .eq("id", id)
+    .maybeSingle();
   const data = throwIfError(res as never) as IntakeSubmissionRow | null;
   return data ? mapIntakeSubmission(data) : null;
 }

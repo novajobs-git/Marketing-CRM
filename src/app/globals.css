@@ -346,11 +346,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* overflow-x-clip, not overflow-x-hidden: "hidden" on one axis forces the
+     other axis's computed overflow to auto per spec, silently turning body
+     into its own scroll container instead of the viewport — which breaks
+     `position: sticky` for anything inside it (e.g. the app sidebar). `clip`
+     prevents the same horizontal overflow without that side effect. */
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground overflow-x-clip;
   }
   html {
-    @apply font-sans overflow-x-hidden;
+    @apply font-sans overflow-x-clip;
   }
 
   /* A native <legend> inside a display:flex <fieldset> doesn't reliably respect

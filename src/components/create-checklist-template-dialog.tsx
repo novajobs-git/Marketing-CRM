@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Loader2Icon } from "lucide-react";
 import { Fieldset } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,7 +118,7 @@ export function CreateChecklistTemplateDialog() {
 
           <DialogFooter>
             <Button type="submit" disabled={pending || selected.size === 0}>
-              {pending ? "Saving…" : "Create template"}
+              {pending ? <Loader2Icon className="animate-spin" /> : "Create template"}
             </Button>
           </DialogFooter>
         </form>

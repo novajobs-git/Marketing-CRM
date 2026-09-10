@@ -23,10 +23,8 @@ export default async function ApplicationDetailPage({
 }: {
   params: Promise<{ id: string; applicationId: string }>;
 }) {
-  const session = await getSession();
+  const [session, { id, applicationId }] = await Promise.all([getSession(), params]);
   if (!session) redirect("/login");
-
-  const { id, applicationId } = await params;
 
   const application = await findApplicationById(createSupabaseServerClient(), applicationId);
   if (!application || application.candidateId !== id) notFound();

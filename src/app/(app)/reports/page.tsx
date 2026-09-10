@@ -30,10 +30,11 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{ candidate?: string; recruiter?: string; from?: string; to?: string }>;
 }) {
-  const session = await getSession();
+  const [session, { candidate: candidateId, recruiter, from, to }] = await Promise.all([
+    getSession(),
+    searchParams,
+  ]);
   if (!session) redirect("/login");
-
-  const { candidate: candidateId, recruiter, from, to } = await searchParams;
 
   const client = createSupabaseServerClient();
 

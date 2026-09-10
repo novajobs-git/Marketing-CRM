@@ -30,21 +30,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         session={{ name: session.name, email: session.email, role: session.role }}
       />
 
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-border px-3 py-4 lg:flex">
+      <aside className="hidden w-56 shrink-0 flex-col border-r border-border px-3 py-4 lg:sticky lg:top-0 lg:flex lg:h-svh">
         <Link href="/dashboard" className="flex items-center gap-2 px-2 py-2">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Briefcase className="size-4" />
           </span>
-          <span className="text-sm font-semibold tracking-tight text-foreground">
+          <span className="truncate text-sm font-semibold tracking-tight text-foreground">
             Recruitment CRM
           </span>
         </Link>
 
-        <div className="mt-4 flex-1">
+        <div className="mt-4 flex-1 overflow-y-auto">
           <SideNav items={navItems} />
         </div>
 
-        <div className="flex items-center justify-between border-t border-border px-1 pt-3">
+        <div className="flex shrink-0 items-center justify-between border-t border-border px-1 pt-3">
           <UserMenu name={session.name} email={session.email} role={session.role} />
           {session.role === "ADMIN" && <QuickAddMenu />}
         </div>

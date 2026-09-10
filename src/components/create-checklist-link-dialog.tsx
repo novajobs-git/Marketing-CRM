@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { UserRoundPlus, Copy, Check } from "lucide-react";
+import { UserRoundPlus, Copy, Check, Loader2Icon } from "lucide-react";
 import { Fieldset } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -109,7 +109,7 @@ export function CreateChecklistLinkDialog({ templates }: { templates: Option[] }
             </Fieldset>
             <DialogFooter>
               <Button type="submit" disabled={pending}>
-                {pending ? "Creating…" : "Create link"}
+                {pending ? <Loader2Icon className="animate-spin" /> : "Create link"}
               </Button>
             </DialogFooter>
           </form>

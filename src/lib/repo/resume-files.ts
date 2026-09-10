@@ -51,7 +51,7 @@ export async function listResumeFilesForCandidate(
 ): Promise<ResumeFile[]> {
   let query = client
     .from("resume_files")
-    .select("*")
+    .select("id, candidate_id, storage_key, filename, mime_type, size_bytes, is_tailored_version, uploaded_by_id, uploaded_at")
     .eq("candidate_id", candidateId)
     .order("uploaded_at", { ascending: false });
   if (opts.tailoredOnly) query = query.eq("is_tailored_version", true);
@@ -63,7 +63,11 @@ export async function listResumeFilesForCandidate(
 }
 
 export async function findResumeFileById(client: SupabaseClient, id: string): Promise<ResumeFile | null> {
-  const res = await client.from("resume_files").select("*").eq("id", id).maybeSingle();
+  const res = await client
+    .from("resume_files")
+    .select("id, candidate_id, storage_key, filename, mime_type, size_bytes, is_tailored_version, uploaded_by_id, uploaded_at")
+    .eq("id", id)
+    .maybeSingle();
   const data = throwIfError(res as never) as ResumeFileRow | null;
   return data ? mapResumeFile(data) : null;
 }
@@ -74,7 +78,9 @@ export async function findResumeFileWithCandidate(
 ): Promise<(ResumeFile & { candidate: { assignedRecruiterId: string | null } }) | null> {
   const res = await client
     .from("resume_files")
-    .select("*, candidate:candidate_profiles(assigned_recruiter_id)")
+    .select(
+      "id, candidate_id, storage_key, filename, mime_type, size_bytes, is_tailored_version, uploaded_by_id, uploaded_at, candidate:candidate_profiles(assigned_recruiter_id)"
+    )
     .eq("id", id)
     .maybeSingle();
   const row = throwIfError(res as never) as (ResumeFileRow & { candidate: { assigned_recruiter_id: string | null } | null }) | null;

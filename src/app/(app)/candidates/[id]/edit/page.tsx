@@ -13,8 +13,7 @@ export default async function EditCandidatePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
-  const { id } = await params;
+  const [, { id }] = await Promise.all([requireAdmin(), params]);
 
   const client = createSupabaseServerClient();
   const [candidate, recruiters] = await Promise.all([

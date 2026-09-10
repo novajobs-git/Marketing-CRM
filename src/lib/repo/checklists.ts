@@ -39,7 +39,7 @@ export async function countChecklistTemplates(client: SupabaseClient): Promise<n
 export async function listChecklistTemplates(client: SupabaseClient): Promise<ChecklistTemplateWithCount[]> {
   const res = await client
     .from("checklist_templates")
-    .select("*, links:checklist_links(count)")
+    .select("id, name, field_keys, created_by_id, created_at, links:checklist_links(count)")
     .order("created_at", { ascending: false });
   const data = throwIfError(res as never) as {
     id: string;
@@ -79,7 +79,9 @@ export async function listChecklistLinks(
 ): Promise<ChecklistLinkWithRelations[]> {
   let query = client
     .from("checklist_links")
-    .select("*, template:checklist_templates(name)")
+    .select(
+      "id, token, template_id, status, resulting_intake_submission_id, created_by_id, created_at, submitted_at, template:checklist_templates(name)"
+    )
     .order("created_at", { ascending: false });
   if (opts.limit) query = query.limit(opts.limit);
   const res = await query;

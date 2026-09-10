@@ -23,9 +23,8 @@ export default async function AdminProfilesPage({
 }: {
   searchParams: Promise<{ q?: string; view?: string; recruiter?: string }>;
 }) {
-  const session = await requireSession();
+  const [session, { q, recruiter, view: rawView }] = await Promise.all([requireSession(), searchParams]);
   const isAdmin = session.role === "ADMIN";
-  const { q, recruiter, view: rawView } = await searchParams;
   const activeView = VIEWS.find((v) => v.key === rawView)?.key ?? "all";
 
   const client = createSupabaseServerClient();

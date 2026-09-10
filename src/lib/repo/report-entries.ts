@@ -113,7 +113,7 @@ export async function listReportEntriesForCandidate(
 ): Promise<ReportEntry[]> {
   const res = await client
     .from("report_entries")
-    .select("*")
+    .select("id, candidate_id, date, applications_count, interviews_count, offers_count, notes, created_by_id, created_at")
     .eq("candidate_id", candidateId)
     .order("date", { ascending: false });
   const data = throwIfError(res as never) as ReportEntryRow[];

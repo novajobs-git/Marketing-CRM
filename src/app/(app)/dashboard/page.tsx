@@ -29,25 +29,24 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ q?: string; recruiter?: string }>;
 }) {
-  const session = await getSession();
+  const [session, { q, recruiter }] = await Promise.all([getSession(), searchParams]);
   if (!session) redirect("/login");
-
-  const { q, recruiter } = await searchParams;
 
   const client = createSupabaseServerClient();
 
-  const profiles = await listCandidates(client, {
-    excludeStatus: "ARCHIVED",
-    assignedRecruiterId: recruiter,
-    search: q,
-  });
+  const [profiles, rollup] = await Promise.all([
+    listCandidates(client, {
+      excludeStatus: "ARCHIVED",
+      assignedRecruiterId: recruiter,
+      search: q,
+    }),
+    session.role === "ADMIN" ? listRecruitersWithCounts(client) : Promise.resolve([]),
+  ]);
 
   const counts = await countApplicationsByCandidate(
     client,
     profiles.map((p) => p.id)
   );
-
-  const rollup = session.role === "ADMIN" ? await listRecruitersWithCounts(client) : [];
 
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -95,12 +94,12 @@ export default async function DashboardPage({
       </form>
 
       <div className="mt-6">
-        <Table>
+        <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
-              <TableHead>Candidate</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Recruiter</TableHead>
+              <TableHead className="w-[24%]">Candidate</TableHead>
+              <TableHead className="w-[14%]">Role</TableHead>
+              <TableHead className="w-[20%]">Recruiter</TableHead>
               <TableHead>Applications</TableHead>
               <TableHead>Interviews</TableHead>
               <TableHead>Assessments</TableHead>
@@ -124,22 +123,22 @@ export default async function DashboardPage({
               return (
                 <TableRow key={profile.id}>
                   <TableCell className="font-medium text-foreground">
-                    <Link href={`/candidates/${profile.id}`} className="flex items-center gap-2">
+                    <Link href={`/candidates/${profile.id}`} prefetch className="flex min-w-0 items-center gap-2">
                       <InitialsAvatar name={profile.name} />
-                      {profile.name}
+                      <span className="truncate">{profile.name}</span>
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    <Link href={`/candidates/${profile.id}`} className="flex items-center">
-                      {profile.role}
+                    <Link href={`/candidates/${profile.id}`} prefetch className="flex min-w-0 items-center">
+                      <span className="truncate">{profile.role}</span>
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    <span className="flex items-center gap-2">
+                    <span className="flex min-w-0 items-center gap-2">
                       {profile.assignedRecruiter && (
                         <InitialsAvatar name={profile.assignedRecruiter.name} />
                       )}
-                      {profile.assignedRecruiter?.name ?? "Unassigned"}
+                      <span className="truncate">{profile.assignedRecruiter?.name ?? "Unassigned"}</span>
                     </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{c.applications}</TableCell>

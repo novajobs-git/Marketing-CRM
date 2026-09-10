@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -141,7 +141,7 @@ export function RecruiterRowActions({
                 });
               }}
             >
-              {pending ? "Reassigning…" : "Reassign"}
+              {pending ? <Loader2Icon className="animate-spin" /> : "Reassign"}
             </Button>
           </DialogFooter>
         </DialogContent>

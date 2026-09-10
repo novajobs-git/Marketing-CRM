@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { JSONContent } from "@tiptap/react";
+import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,7 +93,7 @@ export function AddApplicationForm({
 
       <div className="flex justify-end">
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Saving…" : "Save application"}
+          {pending ? <Loader2Icon className="animate-spin" /> : "Save application"}
         </Button>
       </div>
     </form>

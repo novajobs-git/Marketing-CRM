@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader2Icon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -124,10 +125,10 @@ export function ProfilesTable({
               disabled={pending || !reassignTarget}
               onClick={reassignSelected}
             >
-              {pending ? "Reassigning…" : "Reassign"}
+              {pending ? <Loader2Icon className="animate-spin" /> : "Reassign"}
             </Button>
             <Button variant="outline" size="sm" disabled={pending} onClick={archiveSelected}>
-              {pending ? "Archiving…" : "Archive selected"}
+              {pending ? <Loader2Icon className="animate-spin" /> : "Archive selected"}
             </Button>
           </div>
         </div>
@@ -141,10 +142,10 @@ export function ProfilesTable({
                 <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
               </TableHead>
             )}
-            <TableHead>Name</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Assigned recruiter</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead className="w-[32%]">Name</TableHead>
+            <TableHead className="w-[18%]">Role</TableHead>
+            <TableHead className="w-[28%]">Assigned recruiter</TableHead>
+            <TableHead className="w-[15%]">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -167,30 +168,30 @@ export function ProfilesTable({
                 </TableCell>
               )}
               <TableCell className="font-medium text-foreground">
-                <Link href={`/candidates/${profile.id}`} className="flex items-center gap-2">
+                <Link href={`/candidates/${profile.id}`} prefetch className="flex min-w-0 items-center gap-2">
                   <InitialsAvatar name={profile.name} />
-                  {profile.name}
+                  <span className="truncate">{profile.name}</span>
                 </Link>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                <Link href={`/candidates/${profile.id}`} className="flex items-center">
-                  {profile.role}
+                <Link href={`/candidates/${profile.id}`} prefetch className="flex min-w-0 items-center">
+                  <span className="truncate">{profile.role}</span>
                 </Link>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                <Link href={`/candidates/${profile.id}`} className="flex items-center gap-2">
+                <Link href={`/candidates/${profile.id}`} prefetch className="flex min-w-0 items-center gap-2">
                   {profile.assignedRecruiter ? (
                     <>
                       <InitialsAvatar name={profile.assignedRecruiter.name} />
-                      {profile.assignedRecruiter.name}
+                      <span className="truncate">{profile.assignedRecruiter.name}</span>
                     </>
                   ) : (
-                    "Unassigned"
+                    <span className="truncate">Unassigned</span>
                   )}
                 </Link>
               </TableCell>
               <TableCell>
-                <Link href={`/candidates/${profile.id}`} className="flex items-center">
+                <Link href={`/candidates/${profile.id}`} prefetch className="flex items-center">
                   <Badge variant={profile.status === "ARCHIVED" ? "outline" : "secondary"}>
                     {STATUS_LABEL[profile.status]}
                   </Badge>
