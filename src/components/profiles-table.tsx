@@ -192,7 +192,15 @@ export function ProfilesTable({
               </TableCell>
               <TableCell>
                 <Link href={`/candidates/${profile.id}`} prefetch className="flex items-center">
-                  <Badge variant={profile.status === "ARCHIVED" ? "outline" : "secondary"}>
+                  <Badge
+                    variant={
+                      profile.status === "ACTIVE"
+                        ? "success"
+                        : profile.status === "ARCHIVED"
+                          ? "outline"
+                          : "secondary"
+                    }
+                  >
                     {STATUS_LABEL[profile.status]}
                   </Badge>
                 </Link>

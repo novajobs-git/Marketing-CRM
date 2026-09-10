@@ -145,7 +145,9 @@ export default async function DashboardPage({
                   <TableCell className="text-muted-foreground">{c.interviews}</TableCell>
                   <TableCell className="text-muted-foreground">{c.assessments}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{STATUS_LABEL[profile.status]}</Badge>
+                    <Badge variant={profile.status === "ACTIVE" ? "success" : "secondary"}>
+                      {STATUS_LABEL[profile.status]}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               );

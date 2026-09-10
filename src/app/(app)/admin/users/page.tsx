@@ -91,7 +91,7 @@ export default async function AdminUsersPage({
                   </TableCell>
                   <TableCell className="text-muted-foreground">{recruiter.email}</TableCell>
                   <TableCell>
-                    <Badge variant={recruiter.status === "ACTIVE" ? "secondary" : "outline"}>
+                    <Badge variant={recruiter.status === "ACTIVE" ? "success" : "outline"}>
                       {recruiter.status === "ACTIVE" ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>

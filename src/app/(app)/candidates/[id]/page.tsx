@@ -124,7 +124,15 @@ export default async function CandidateDetailPage({
               <h1 className="text-3xl font-semibold tracking-tight text-foreground">
                 {candidate.name}
               </h1>
-              <Badge variant={candidate.status === "ARCHIVED" ? "outline" : "secondary"}>
+              <Badge
+                variant={
+                  candidate.status === "ACTIVE"
+                    ? "success"
+                    : candidate.status === "ARCHIVED"
+                      ? "outline"
+                      : "secondary"
+                }
+              >
                 {STATUS_LABEL[candidate.status]}
               </Badge>
             </div>

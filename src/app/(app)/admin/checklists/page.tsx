@@ -111,7 +111,15 @@ export default async function ChecklistsPage() {
               <TableRow key={link.id}>
                 <TableCell className="font-medium text-foreground">{link.template.name}</TableCell>
                 <TableCell>
-                  <Badge variant={link.status === "PENDING" ? "secondary" : "outline"}>
+                  <Badge
+                    variant={
+                      link.status === "SUBMITTED"
+                        ? "default"
+                        : link.status === "PENDING"
+                          ? "secondary"
+                          : "outline"
+                    }
+                  >
                     {LINK_STATUS_LABEL[link.status]}
                   </Badge>
                 </TableCell>
