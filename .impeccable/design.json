@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-11T20:24:36Z",
+  "title": "Design System: Recruitment CRM",
+  "extensions": {
+    "colorMeta": {
+      "system-blue": {
+        "role": "primary",
+        "displayName": "System Blue",
+        "canonical": "oklch(0.55 0.211 260)",
+        "tonalRamp": ["oklch(0.16 0.09 260)", "oklch(0.28 0.15 260)", "oklch(0.40 0.19 260)", "oklch(0.55 0.211 260)", "oklch(0.68 0.17 260)", "oklch(0.80 0.10 260)", "oklch(0.90 0.05 260)", "oklch(0.97 0.02 260)"]
+      },
+      "primary-foreground": {
+        "role": "neutral",
+        "displayName": "Primary Foreground",
+        "canonical": "oklch(0.99 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)", "oklch(0.995 0 0)"]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "oklch(0.995 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)", "oklch(0.995 0 0)"]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Near-Black Ink",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)", "oklch(0.995 0 0)"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card White",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)", "oklch(1 0 0)"]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Quiet Gray",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)", "oklch(0.97 0 0)"]
+      },
+      "secondary-foreground": {
+        "role": "neutral",
+        "displayName": "Secondary Ink",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)", "oklch(0.995 0 0)"]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.556 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.90 0 0)"]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Accent Wash",
+        "canonical": "oklch(0.96 0.02 260)",
+        "tonalRamp": ["oklch(0.20 0.03 260)", "oklch(0.32 0.04 260)", "oklch(0.44 0.05 260)", "oklch(0.56 0.05 260)", "oklch(0.68 0.04 260)", "oklch(0.80 0.03 260)", "oklch(0.90 0.02 260)", "oklch(0.97 0.01 260)"]
+      },
+      "accent-foreground": {
+        "role": "primary",
+        "displayName": "Accent Ink",
+        "canonical": "oklch(0.35 0.12 260)",
+        "tonalRamp": ["oklch(0.16 0.09 260)", "oklch(0.28 0.15 260)", "oklch(0.35 0.12 260)", "oklch(0.44 0.11 260)", "oklch(0.55 0.09 260)", "oklch(0.68 0.07 260)", "oklch(0.80 0.05 260)", "oklch(0.90 0.03 260)"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline Border",
+        "canonical": "oklch(0.928 0 0)",
+        "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.269 0 0)", "oklch(0.39 0 0)", "oklch(0.50 0 0)", "oklch(0.63 0 0)", "oklch(0.77 0 0)", "oklch(0.928 0 0)", "oklch(0.97 0 0)"]
+      },
+      "destructive": {
+        "role": "danger",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": ["oklch(0.20 0.10 27)", "oklch(0.32 0.15 27)", "oklch(0.44 0.20 27)", "oklch(0.577 0.245 27)", "oklch(0.68 0.20 27)", "oklch(0.78 0.15 27)", "oklch(0.88 0.08 27)", "oklch(0.95 0.03 27)"]
+      },
+      "success": {
+        "role": "success",
+        "displayName": "Muted Emerald",
+        "canonical": "oklch(0.696 0.17 162.48)",
+        "tonalRamp": ["oklch(0.20 0.08 162)", "oklch(0.32 0.12 162)", "oklch(0.44 0.15 162)", "oklch(0.56 0.17 162)", "oklch(0.696 0.17 162)", "oklch(0.80 0.13 162)", "oklch(0.90 0.07 162)", "oklch(0.96 0.03 162)"]
+      },
+      "warning": {
+        "role": "warning",
+        "displayName": "Muted Amber",
+        "canonical": "oklch(0.795 0.184 86.047)",
+        "tonalRamp": ["oklch(0.25 0.08 86)", "oklch(0.38 0.12 86)", "oklch(0.50 0.15 86)", "oklch(0.63 0.18 86)", "oklch(0.795 0.184 86)", "oklch(0.85 0.14 86)", "oklch(0.92 0.08 86)", "oklch(0.97 0.03 86)"]
+      },
+      "info": {
+        "role": "info",
+        "displayName": "Muted Violet",
+        "canonical": "oklch(0.606 0.25 292.717)",
+        "tonalRamp": ["oklch(0.22 0.12 292)", "oklch(0.34 0.18 292)", "oklch(0.46 0.22 292)", "oklch(0.606 0.25 292)", "oklch(0.70 0.20 292)", "oklch(0.80 0.14 292)", "oklch(0.90 0.08 292)", "oklch(0.96 0.03 292)"]
+      },
+      "status-applied": {
+        "role": "status",
+        "displayName": "Status — Applied",
+        "canonical": "oklch(0.94 0.02 250)",
+        "tonalRamp": ["oklch(0.3 0.05 250)", "oklch(0.4 0.05 250)", "oklch(0.5 0.04 250)", "oklch(0.6 0.04 250)", "oklch(0.7 0.03 250)", "oklch(0.8 0.03 250)", "oklch(0.88 0.025 250)", "oklch(0.94 0.02 250)"]
+      },
+      "status-interview": {
+        "role": "status",
+        "displayName": "Status — Interview",
+        "canonical": "oklch(0.94 0.05 80)",
+        "tonalRamp": ["oklch(0.32 0.06 80)", "oklch(0.42 0.06 80)", "oklch(0.52 0.055 80)", "oklch(0.62 0.05 80)", "oklch(0.72 0.045 80)", "oklch(0.82 0.04 80)", "oklch(0.89 0.045 80)", "oklch(0.94 0.05 80)"]
+      },
+      "status-assessment": {
+        "role": "status",
+        "displayName": "Status — Assessment",
+        "canonical": "oklch(0.94 0.03 300)",
+        "tonalRamp": ["oklch(0.3 0.06 300)", "oklch(0.4 0.055 300)", "oklch(0.5 0.05 300)", "oklch(0.6 0.045 300)", "oklch(0.7 0.04 300)", "oklch(0.8 0.035 300)", "oklch(0.88 0.03 300)", "oklch(0.94 0.03 300)"]
+      },
+      "status-offer": {
+        "role": "status",
+        "displayName": "Status — Offer",
+        "canonical": "oklch(0.94 0.04 150)",
+        "tonalRamp": ["oklch(0.3 0.06 150)", "oklch(0.4 0.055 150)", "oklch(0.5 0.05 150)", "oklch(0.6 0.045 150)", "oklch(0.7 0.04 150)", "oklch(0.8 0.04 150)", "oklch(0.88 0.04 150)", "oklch(0.94 0.04 150)"]
+      },
+      "status-rejected": {
+        "role": "status",
+        "displayName": "Status — Rejected",
+        "canonical": "oklch(0.94 0.03 25)",
+        "tonalRamp": ["oklch(0.3 0.06 25)", "oklch(0.4 0.06 25)", "oklch(0.5 0.05 25)", "oklch(0.6 0.045 25)", "oklch(0.7 0.04 25)", "oklch(0.8 0.035 25)", "oklch(0.88 0.03 25)", "oklch(0.94 0.03 25)"]
+      },
+      "status-withdrawn": {
+        "role": "status",
+        "displayName": "Status — Withdrawn",
+        "canonical": "oklch(0.94 0 0)",
+        "tonalRamp": ["oklch(0.28 0 0)", "oklch(0.38 0 0)", "oklch(0.48 0 0)", "oklch(0.58 0 0)", "oklch(0.68 0 0)", "oklch(0.78 0 0)", "oklch(0.87 0 0)", "oklch(0.94 0 0)"]
+      },
+      "avatar-blue": {
+        "role": "identity",
+        "displayName": "Avatar — Blue",
+        "canonical": "oklch(0.9 0.05 250)",
+        "tonalRamp": ["oklch(0.32 0.07 250)", "oklch(0.42 0.07 250)", "oklch(0.52 0.065 250)", "oklch(0.62 0.06 250)", "oklch(0.72 0.055 250)", "oklch(0.8 0.06 250)", "oklch(0.85 0.055 250)", "oklch(0.9 0.05 250)"]
+      },
+      "avatar-coral": {
+        "role": "identity",
+        "displayName": "Avatar — Coral",
+        "canonical": "oklch(0.9 0.06 25)",
+        "tonalRamp": ["oklch(0.33 0.08 25)", "oklch(0.43 0.08 25)", "oklch(0.53 0.075 25)", "oklch(0.63 0.07 25)", "oklch(0.73 0.065 25)", "oklch(0.8 0.065 25)", "oklch(0.85 0.06 25)", "oklch(0.9 0.06 25)"]
+      },
+      "avatar-green": {
+        "role": "identity",
+        "displayName": "Avatar — Green",
+        "canonical": "oklch(0.9 0.06 150)",
+        "tonalRamp": ["oklch(0.32 0.07 150)", "oklch(0.42 0.07 150)", "oklch(0.52 0.065 150)", "oklch(0.62 0.06 150)", "oklch(0.72 0.06 150)", "oklch(0.8 0.06 150)", "oklch(0.85 0.06 150)", "oklch(0.9 0.06 150)"]
+      },
+      "avatar-gold": {
+        "role": "identity",
+        "displayName": "Avatar — Gold",
+        "canonical": "oklch(0.91 0.07 80)",
+        "tonalRamp": ["oklch(0.34 0.08 80)", "oklch(0.44 0.08 80)", "oklch(0.54 0.075 80)", "oklch(0.64 0.07 80)", "oklch(0.74 0.07 80)", "oklch(0.81 0.07 80)", "oklch(0.86 0.07 80)", "oklch(0.91 0.07 80)"]
+      },
+      "avatar-violet": {
+        "role": "identity",
+        "displayName": "Avatar — Violet",
+        "canonical": "oklch(0.9 0.06 300)",
+        "tonalRamp": ["oklch(0.32 0.07 300)", "oklch(0.42 0.07 300)", "oklch(0.52 0.065 300)", "oklch(0.62 0.06 300)", "oklch(0.72 0.06 300)", "oklch(0.8 0.06 300)", "oklch(0.85 0.06 300)", "oklch(0.9 0.06 300)"]
+      },
+      "avatar-teal": {
+        "role": "identity",
+        "displayName": "Avatar — Teal",
+        "canonical": "oklch(0.9 0.05 190)",
+        "tonalRamp": ["oklch(0.32 0.06 190)", "oklch(0.42 0.06 190)", "oklch(0.52 0.055 190)", "oklch(0.62 0.05 190)", "oklch(0.72 0.05 190)", "oklch(0.8 0.05 190)", "oklch(0.85 0.05 190)", "oklch(0.9 0.05 190)"]
+      }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Every page's single <h1> title. Top-left, never centered." },
+      "title": { "displayName": "Title", "purpose": "Dialog titles (bold, 18px); card titles use a quieter semibold 16px step." },
+      "body": { "displayName": "Body", "purpose": "Default UI text — table cells, form fields, descriptions." },
+      "label": { "displayName": "Label / Eyebrow", "purpose": "Uppercase tracking-wide section captions and metadata. Never used for clickable text." }
+    },
+    "shadows": [
+      { "name": "overlay", "value": "0 2px 8px 0 rgba(0,0,0,0.06), 0 -6px 12px 0 rgba(0,0,0,0.03), 0 14px 28px 0 rgba(0,0,0,0.08)", "purpose": "The system's only shadow — dialogs, popovers, dropdown menus, date-picker calendar. Never applied to at-rest surfaces." }
+    ],
+    "motion": [
+      { "name": "state-transition", "value": "all 0.2s ease", "purpose": "Default easing for color/background/border transitions (hover, focus, active-state changes)." },
+      { "name": "press-feedback", "value": "transform 0.15s ease", "purpose": "1px downward translate on :active for every button variant — the system's one piece of tactile motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Pill-shaped, System-Blue button with hover-invert and a sliding directional arrow — the default call-to-action.",
+      "html": "<button class=\"ds-btn-primary\">Add candidate<span class=\"ds-btn-arrow\" aria-hidden=\"true\"><span class=\"ds-btn-arrow-line\"></span></span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 10px; border: none; border-radius: 9999px; background: var(--primary); color: var(--primary-foreground); font-size: 0.875rem; font-weight: 500; font-family: var(--font-sans, sans-serif); cursor: pointer; transition: background-color 0.2s, color 0.2s, transform 0.15s; } .ds-btn-primary:hover { background: var(--foreground); color: var(--background); } .ds-btn-primary:hover .ds-btn-arrow-line { background: var(--background); } .ds-btn-primary:hover .ds-btn-arrow-line::after { right: 0; border-color: var(--background); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); } .ds-btn-arrow { display: inline-flex; align-items: center; } .ds-btn-arrow-line { position: relative; display: block; width: 10px; height: 2px; background: var(--primary-foreground); transition: background-color 0.2s; } .ds-btn-arrow-line::after { content: ''; position: absolute; top: -3px; right: 3px; width: 6px; height: 6px; border-right: 2px solid var(--primary-foreground); border-bottom: 2px solid var(--primary-foreground); transform: rotate(-45deg); transition: right 0.2s, border-color 0.2s; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Transparent, hairline-bordered text input with a System-Blue focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search by name or role…\" />",
+      "css": ".ds-input { height: 32px; width: 100%; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: transparent; color: var(--foreground); font-size: 0.875rem; font-family: var(--font-sans, sans-serif); outline: none; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat, ring-bordered surface — one lightness step brighter than the page background, no shadow at rest.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Priya Patel</div><div class=\"ds-card-desc\">12 assigned profiles</div></div>",
+      "css": ".ds-card { background: var(--card); border-radius: var(--radius-xl); padding: 16px; box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent); font-family: var(--font-sans, sans-serif); } .ds-card-title { font-size: 0.875rem; font-weight: 600; color: var(--foreground); } .ds-card-desc { margin-top: 4px; font-size: 0.75rem; color: var(--muted-foreground); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-default",
+      "description": "Pill badge in the muted per-status color family (shown here as Applied). The intended coloring for application status — the current build renders these with the flat neutral secondary variant instead.",
+      "html": "<span class=\"ds-badge ds-badge-applied\">Applied</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; height: 20px; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; font-family: var(--font-sans, sans-serif); } .ds-badge-applied { background: var(--status-applied); color: var(--status-applied-foreground); }"
+    },
+    {
+      "name": "Initials Avatar",
+      "kind": "custom",
+      "refersTo": "avatar-blue",
+      "description": "Circular initials badge in one of six muted hues, deterministically hashed per person name. The system's signature identity component.",
+      "html": "<span class=\"ds-avatar ds-avatar-blue\">PP</span>",
+      "css": ".ds-avatar { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 9999px; font-size: 0.65rem; font-weight: 500; font-family: var(--font-sans, sans-serif); } .ds-avatar-blue { background: var(--avatar-1); color: var(--avatar-1-foreground); }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "badge-default",
+      "description": "Icon+label navigation row; active state is an Accent Wash fill, never an underline or border.",
+      "html": "<a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">Dashboard</a>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; font-family: var(--font-sans, sans-serif); color: var(--muted-foreground); text-decoration: none; transition: background-color 0.2s, color 0.2s; } .ds-nav-item:hover { background: var(--muted); color: var(--foreground); } .ds-nav-item-active { background: var(--accent); color: var(--accent-foreground); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Operator",
+    "overview": "This is Nova Staffs' internal recruiting operations tool, not a marketing surface — recruiters and admins live in it all day, so the design's job is to disappear and let the work show through. One restrained accent (System Blue) carries every signal of action and focus; everything else stays neutral, flat, and quiet. Status and identity are color-coded, but deliberately desaturated, so the eye reads structure and activity, never noise. The aesthetic is calm, precise, and unshowy — closer to an iOS system app than a dashboard product. Surfaces stay flat at rest, corners are generously and consistently rounded, and typography leans on scale and weight contrast rather than color to establish hierarchy. It explicitly rejects the generic dense enterprise-SaaS look: no heavy gray chrome, no cramped zebra tables, no shouting for attention. Interaction feedback (hover inversion, a sliding directional arrow, a 1px press) gives the restraint a pulse instead of making it feel inert.",
+    "keyCharacteristics": [
+      "Single accent color (System Blue), used sparingly and only for action/focus/active state",
+      "Flat surfaces (ring/border, not shadow) at rest; shadow reserved for content that floats above the page",
+      "Muted, desaturated semantic color families for status badges and person-avatars, never saturated brights",
+      "Generous, consistent corner rounding across buttons, cards, badges, and avatars",
+      "Tabular-numeral stat tiles and uppercase tracking-wide eyebrow labels for structure without added color or weight"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "System Blue is the only saturated color allowed anywhere in the interface. Every other color — status, avatar, semantic — is desaturated to roughly the same low-chroma recipe. If a new color is needed, it must fit that recipe, not introduce new saturation.", "section": "colors" },
+      { "name": "The Tint-Never-Fill Rule", "body": "Destructive and accent-wash colors are applied as low-opacity tints or /10–/20 backgrounds, never as solid saturated fills outside the primary button/badge.", "section": "colors" },
+      { "name": "The Scale-Not-Color Rule", "body": "Hierarchy is built with size and weight jumps (14→16→18→30px, normal→medium→semibold→bold), not with color or a second typeface. A heavier or larger element always outranks a colored one.", "section": "typography" },
+      { "name": "The Tabular Numerals Rule", "body": "Any numeral that represents a live count (applications, interviews, offers, stat tiles) renders with tabular-nums so digits don't shift width as they update.", "section": "typography" },
+      { "name": "The Two-Rail Rule", "body": "A page never has more than two left-hand rails at once: the primary app sidebar, and optionally one page-local Views/filter rail. If a page needs more filtering than that, it goes in the toolbar row (search, chips), not a third rail.", "section": "layout" },
+      { "name": "The Flat-At-Rest Rule", "body": "Nothing that sits in the page's normal flow — card, table, sidebar, stat tile — ever gets a box-shadow. If it needs to be distinguished, use a ring/border and a background-lightness step, not depth.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep System Blue as the only saturated color in the interface — every other hue (status, avatar, semantic) stays in the same low-chroma, high-lightness recipe.",
+      "Do keep cards, tables, and any at-rest surface flat (ring/border only); reserve the single overlay shadow for dialogs, popovers, and dropdowns.",
+      "Do use tabular-nums on any numeral that represents a live, updating count.",
+      "Do use the uppercase, tracking-wide, muted-foreground eyebrow-label pattern for section/group headers instead of a heavier headline.",
+      "Do give primary (default variant) buttons the hover-invert + sliding-arrow treatment; keep every other button variant flat-colored with only the shared press/focus feedback.",
+      "Do cap forms and detail/review pages at max-w-3xl–max-w-5xl; leave list/table pages full-width."
+    ],
+    "donts": [
+      "Don't introduce a second saturated accent color. If something needs to stand out, use System Blue, weight, or size — not a new hue.",
+      "Don't add box-shadow to anything that sits in the page's normal flow (cards, tables, sidebars, stat tiles) — that reads as generic enterprise-SaaS clutter, the explicit anti-reference for this system.",
+      "Don't render a solid, fully-saturated fill for destructive or semantic colors — tint them, per the Tint-Never-Fill Rule.",
+      "Don't mix typefaces for hierarchy. One family (Google Sans) at every weight/size step; contrast comes from scale, not font-switching.",
+      "Don't add a max-w-* cap to a list/table page, or leave a form/detail page uncapped — both break the system's one layout-width convention."
+    ]
+  }
+}
