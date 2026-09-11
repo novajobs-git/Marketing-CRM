@@ -119,3 +119,40 @@ export async function listReportEntriesForCandidate(
   const data = throwIfError(res as never) as ReportEntryRow[];
   return data.map(mapReportEntry);
 }
+
+export async function findReportEntryById(
+  client: SupabaseClient,
+  id: string
+): Promise<ReportEntry | null> {
+  const res = await client
+    .from("report_entries")
+    .select("id, candidate_id, date, applications_count, interviews_count, offers_count, notes, created_by_id, created_at")
+    .eq("id", id)
+    .maybeSingle();
+  const data = throwIfError(res as never) as ReportEntryRow | null;
+  return data ? mapReportEntry(data) : null;
+}
+
+export async function updateReportEntry(
+  client: SupabaseClient,
+  id: string,
+  fields: {
+    date: Date;
+    applicationsCount: number;
+    interviewsCount: number;
+    offersCount: number;
+    notes: string | null;
+  }
+): Promise<void> {
+  const res = await client
+    .from("report_entries")
+    .update({
+      date: fields.date.toISOString().slice(0, 10),
+      applications_count: fields.applicationsCount,
+      interviews_count: fields.interviewsCount,
+      offers_count: fields.offersCount,
+      notes: fields.notes,
+    })
+    .eq("id", id);
+  throwIfError(res as never);
+}

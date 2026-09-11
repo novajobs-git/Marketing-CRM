@@ -32,8 +32,10 @@ import {
 } from "@/lib/candidate-fields";
 import { ArchiveProfileButton } from "@/components/archive-profile-button";
 import { AddReportDialog } from "@/components/add-report-dialog";
+import { EditReportDialog } from "@/components/edit-report-dialog";
 import { CopyButton } from "@/components/copy-button";
 import { cn } from "@/lib/utils";
+import { canEditReportEntry } from "@/lib/authz";
 import { Plus } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -381,12 +383,13 @@ export default async function CandidateDetailPage({
                     <TableHead>Interviews</TableHead>
                     <TableHead>Offers</TableHead>
                     <TableHead>Notes</TableHead>
+                    <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {reportEntries.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                      <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                         No report entries yet.
                       </TableCell>
                     </TableRow>
@@ -401,6 +404,11 @@ export default async function CandidateDetailPage({
                       <TableCell className="text-foreground">{entry.offersCount}</TableCell>
                       <TableCell className="max-w-xs truncate text-muted-foreground">
                         {entry.notes || "—"}
+                      </TableCell>
+                      <TableCell>
+                        {canEditReportEntry(session, candidate, entry) && (
+                          <EditReportDialog entry={entry} candidateId={candidate.id} />
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
