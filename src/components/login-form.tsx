@@ -19,8 +19,27 @@ export function LoginForm({ next }: { next: string }) {
   // Set once Clerk asks for a device-trust code — happens the first time a
   // browser/device signs in, per https://clerk.com/docs/guides/secure/device-trust.
   const [needsDeviceTrustCode, setNeedsDeviceTrustCode] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const submitting = fetchStatus === "fetching";
+
+  function backToSignIn() {
+    setNeedsDeviceTrustCode(false);
+    setResent(false);
+    setCode("");
+    setError(null);
+    void signIn?.reset();
+  }
+
+  async function resendCode() {
+    if (!signIn) return;
+    setError(null);
+    setResent(false);
+    setCode("");
+    const { error: sendError } = await signIn.mfa.sendEmailCode();
+    if (sendError) setError(sendError.longMessage ?? sendError.message);
+    else setResent(true);
+  }
 
   async function completeSignIn() {
     if (!signIn) return;
@@ -86,7 +105,7 @@ export function LoginForm({ next }: { next: string }) {
 
         <p className="text-sm text-muted-foreground">
           This is a new device, so we emailed {email} a verification code. Enter it below to
-          finish signing in.
+          finish signing in. It can take a minute to arrive — check spam if you don&apos;t see it.
         </p>
 
         <div className="flex flex-col gap-2">
@@ -106,6 +125,24 @@ export function LoginForm({ next }: { next: string }) {
         <Button type="submit" size="lg" className="mt-2 w-full" disabled={submitting}>
           {submitting ? <Loader2Icon className="animate-spin" /> : "Verify"}
         </Button>
+
+        <div className="flex items-center justify-between text-sm">
+          <button
+            type="button"
+            onClick={backToSignIn}
+            className="text-muted-foreground underline-offset-4 hover:underline"
+          >
+            Back to sign in
+          </button>
+          <button
+            type="button"
+            onClick={resendCode}
+            disabled={submitting}
+            className="text-primary underline-offset-4 hover:underline disabled:opacity-50"
+          >
+            {resent ? "Code sent — resend again" : "Resend code"}
+          </button>
+        </div>
       </form>
     );
   }
