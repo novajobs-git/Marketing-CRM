@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useSignIn } from "@clerk/nextjs";
+import { useClerk, useSignIn } from "@clerk/nextjs";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
   const { signIn, fetchStatus } = useSignIn();
+  const { signOut } = useClerk();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -71,7 +72,17 @@ export function LoginForm({ next }: { next: string }) {
     setError(null);
     if (!signIn) return;
 
-    const { error: passwordError } = await signIn.password({ identifier: email, password });
+    let { error: passwordError } = await signIn.password({ identifier: email, password });
+
+    if (passwordError?.code === "session_exists") {
+      // A previous (possibly interrupted) sign-in left a stale session in
+      // this browser — Clerk refuses a new one until it's cleared. Since the
+      // person is actively trying to sign in as someone else, clear it and
+      // retry rather than dead-ending on an unhelpful error message.
+      await signOut();
+      ({ error: passwordError } = await signIn.password({ identifier: email, password }));
+    }
+
     if (passwordError) {
       setError(passwordError.longMessage ?? passwordError.message);
       return;
