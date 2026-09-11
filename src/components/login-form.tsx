@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+/** longMessage/message can be an empty string on some Clerk errors — `??` lets
+ *  those through as "", which is falsy and silently hides the error Alert. */
+function describeError(err: { longMessage?: string; message?: string } | null | undefined, fallback: string) {
+  return err?.longMessage || err?.message || fallback;
+}
+
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
   const { signIn, fetchStatus } = useSignIn();
@@ -38,7 +44,7 @@ export function LoginForm({ next }: { next: string }) {
     setResent(false);
     setCode("");
     const { error: sendError } = await signIn.mfa.sendEmailCode();
-    if (sendError) setError(sendError.longMessage ?? sendError.message);
+    if (sendError) setError(describeError(sendError, "Couldn't send a verification code. Please try again."));
     else setResent(true);
   }
 
@@ -48,18 +54,20 @@ export function LoginForm({ next }: { next: string }) {
     if (signIn.status === "needs_client_trust") {
       setNeedsDeviceTrustCode(true);
       const { error: sendError } = await signIn.mfa.sendEmailCode();
-      if (sendError) setError(sendError.longMessage ?? sendError.message);
+      if (sendError) setError(describeError(sendError, "Couldn't send a verification code. Please try again."));
       return;
     }
 
     if (signIn.status !== "complete") {
-      setError("This account needs an additional verification step that isn't supported here.");
+      setError(
+        `This account needs an additional verification step ("${signIn.status}") that isn't supported here. Contact an admin.`
+      );
       return;
     }
 
     const { error: finalizeError } = await signIn.finalize();
     if (finalizeError) {
-      setError(finalizeError.longMessage ?? finalizeError.message);
+      setError(describeError(finalizeError, "Something went wrong finishing sign-in. Please try again."));
       return;
     }
 
@@ -84,7 +92,7 @@ export function LoginForm({ next }: { next: string }) {
     }
 
     if (passwordError) {
-      setError(passwordError.longMessage ?? passwordError.message);
+      setError(describeError(passwordError, "Couldn't sign in. Please try again."));
       return;
     }
 
@@ -98,7 +106,16 @@ export function LoginForm({ next }: { next: string }) {
 
     const { error: verifyError } = await signIn.mfa.verifyEmailCode({ code });
     if (verifyError) {
-      setError(verifyError.longMessage ?? verifyError.message);
+      setError(describeError(verifyError, "That code didn't work. Please try again or request a new one."));
+      return;
+    }
+
+    if (signIn.status === "needs_client_trust") {
+      // The code verified, but Clerk still reports this device as untrusted.
+      // Surface that instead of silently re-sending another code, which
+      // otherwise looks like the "Verify" button does nothing on click.
+      setError("Verification didn't go through. Please request a new code and try again.");
+      setCode("");
       return;
     }
 
