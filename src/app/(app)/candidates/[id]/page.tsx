@@ -114,6 +114,10 @@ export default async function CandidateDetailPage({
   const qa = candidate.applicationQa as ProfessionalDetails | null;
   const education = (candidate.educationHistory as EducationEntry[] | null) ?? [];
   const baseResumes = resumeFiles.filter((r) => !r.isTailoredVersion);
+  // Manual-entry only, not a count of logged Applications/Resume Edits below —
+  // a Resume Edit is a tailored resume/JD pair, not necessarily one real
+  // submitted application, so recruiters log the real total via Reports.
+  const totalApplications = reportEntries.reduce((sum, e) => sum + e.applicationsCount, 0);
 
   const activeTab = ["details", "resume-edits", "reports"].includes(tab ?? "")
     ? tab!
@@ -303,20 +307,30 @@ export default async function CandidateDetailPage({
           </TabsContent>
 
           <TabsContent value="resume-edits" className="mt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <p className="text-sm text-muted-foreground">
                 Every tailored resume + job description pair logged for this candidate.
               </p>
-              {canManage && (
-                <Button
-                  size="sm"
-                  nativeButton={false}
-                  render={<Link href={`/candidates/${candidate.id}/applications/new`} />}
-                >
-                  <Plus />
-                  Add Application
-                </Button>
-              )}
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    Total applications
+                  </p>
+                  <p className="text-lg font-semibold tabular-nums text-foreground">
+                    {totalApplications}
+                  </p>
+                </div>
+                {canManage && (
+                  <Button
+                    size="sm"
+                    nativeButton={false}
+                    render={<Link href={`/candidates/${candidate.id}/applications/new`} />}
+                  >
+                    <Plus />
+                    Add Application
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="mt-4">

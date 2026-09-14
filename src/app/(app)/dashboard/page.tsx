@@ -77,8 +77,10 @@ export default async function DashboardPage({
   const byDay = buildByDayMap(applications, reportEntries);
   const applicationsStat = computeTodayWeekMonth(byDay, "applications", now);
   const interviewsStat = computeTodayWeekMonth(byDay, "interviews", now);
-  const totalApplications =
-    applications.length + reportEntries.reduce((sum, e) => sum + e.applicationsCount, 0);
+  // Applications total is manual-entry only (see buildByDayMap) — a logged
+  // Application is a Resume Edit, not necessarily one real submitted
+  // application, so it never adds to this count.
+  const totalApplications = reportEntries.reduce((sum, e) => sum + e.applicationsCount, 0);
   const totalInterviews =
     applications.filter((a) => a.status === "INTERVIEW").length +
     reportEntries.reduce((sum, e) => sum + e.interviewsCount, 0);

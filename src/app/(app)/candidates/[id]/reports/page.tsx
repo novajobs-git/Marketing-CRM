@@ -65,14 +65,18 @@ export default async function CandidateFullReportsPage({
   const applicationsStat = computeTodayWeekMonth(byDay, "applications", now);
   const interviewsStat = computeTodayWeekMonth(byDay, "interviews", now);
   const offersStat = computeTodayWeekMonth(byDay, "offers", now);
-  const totalApplications =
-    applications.length + reportEntriesForChart.reduce((sum, e) => sum + e.applicationsCount, 0);
+  // Manual-entry only (see buildByDayMap) — a logged Application here is a
+  // Resume Edit, not necessarily one real submitted application.
+  const totalApplications = reportEntriesForChart.reduce((sum, e) => sum + e.applicationsCount, 0);
   const totalInterviews =
     applications.filter((a) => a.status === "INTERVIEW").length +
     reportEntriesForChart.reduce((sum, e) => sum + e.interviewsCount, 0);
   const totalOffers =
     applications.filter((a) => a.status === "OFFER").length +
     reportEntriesForChart.reduce((sum, e) => sum + e.offersCount, 0);
+  // Reflects the current date-range filter (equals the all-time total when
+  // no filter is applied) — shown above the log table, top-right.
+  const filteredTotalApplications = logEntries.reduce((sum, e) => sum + e.applicationsCount, 0);
 
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -119,24 +123,35 @@ export default async function CandidateFullReportsPage({
         />
       </div>
 
-      <form className="mt-8 flex flex-wrap items-center gap-2" method="get">
-        <DatePicker name="from" defaultValue={from} className="w-40" />
-        <span className="text-sm text-muted-foreground">to</span>
-        <DatePicker name="to" defaultValue={to} className="w-40" />
-        <Button type="submit" variant="secondary" size="sm">
-          Filter
-        </Button>
-        {(from || to) && (
-          <Button
-            variant="ghost"
-            size="sm"
-            nativeButton={false}
-            render={<Link href={`/candidates/${id}/reports`} />}
-          >
-            Clear
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
+        <form className="flex flex-wrap items-center gap-2" method="get">
+          <DatePicker name="from" defaultValue={from} className="w-40" />
+          <span className="text-sm text-muted-foreground">to</span>
+          <DatePicker name="to" defaultValue={to} className="w-40" />
+          <Button type="submit" variant="secondary" size="sm">
+            Filter
           </Button>
-        )}
-      </form>
+          {(from || to) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              nativeButton={false}
+              render={<Link href={`/candidates/${id}/reports`} />}
+            >
+              Clear
+            </Button>
+          )}
+        </form>
+
+        <div className="text-right">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Total applications
+          </p>
+          <p className="text-lg font-semibold tabular-nums text-foreground">
+            {filteredTotalApplications}
+          </p>
+        </div>
+      </div>
 
       <div className="mt-6">
         <Table>

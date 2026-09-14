@@ -19,8 +19,12 @@ function emptyMetrics(): DayMetrics {
   return { applications: 0, interviews: 0, offers: 0 };
 }
 
-/** Merges logged Applications (current status → interview/offer) with manual
- *  report_entries (additive, per FR-8.5) into one per-day metrics map. */
+/** Merges logged Applications (current status → interview/offer only) with
+ *  manual report_entries into one per-day metrics map. The "applications"
+ *  count is deliberately sourced from report_entries alone: a logged
+ *  Application here is a tailored resume/JD pair ("Resume Edits"), not
+ *  necessarily one real submitted application, so it never adds to the
+ *  applications total — recruiters log the real total manually via Reports. */
 export function buildByDayMap(
   applications: ApplicationForReport[],
   reportEntries: ReportEntryForReport[]
@@ -38,7 +42,6 @@ export function buildByDayMap(
 
   for (const app of applications) {
     const m = bucket(dateKey(app.appliedDate));
-    m.applications += 1;
     if (app.status === "INTERVIEW") m.interviews += 1;
     if (app.status === "OFFER") m.offers += 1;
   }
