@@ -74,7 +74,7 @@ export function CandidateProfileForm({
         </Select>
       </div>
 
-      <CandidateDetailFields defaultValues={defaultValues} />
+      <CandidateDetailFields defaultValues={defaultValues} mode="admin" />
 
       <div className="flex justify-end">
         <Button type="submit" size="lg" disabled={pending}>

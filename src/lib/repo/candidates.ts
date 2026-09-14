@@ -21,6 +21,10 @@ export type CandidateProfile = {
   archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  /** Admin-only ATS application passwords (e.g. Workday), plain text by
+   *  design — see supabase/migrations/0007_add_candidate_passwords.sql. */
+  password1: string | null;
+  password2: string | null;
 };
 
 export type CandidateWithRecruiter = CandidateProfile & { assignedRecruiter: { id: string; name: string } | null };
@@ -44,6 +48,8 @@ type CandidateRow = {
   created_at: string;
   updated_at: string;
   assigned_recruiter?: { id: string; name: string } | null;
+  password_1: string | null;
+  password_2: string | null;
 };
 
 function throwIfError<T>(res: { data: T; error: { message: string; code?: string } | null }): T {
@@ -71,6 +77,8 @@ function mapCandidate(row: CandidateRow): CandidateWithRecruiter {
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     assignedRecruiter: row.assigned_recruiter ?? null,
+    password1: row.password_1,
+    password2: row.password_2,
   };
 }
 
@@ -153,6 +161,8 @@ export type CandidateWriteFields = {
   eeoAnswers: Record<string, unknown>;
   applicationQa: Record<string, unknown>;
   educationHistory: unknown;
+  password1: string | null;
+  password2: string | null;
 };
 
 function toRow(fields: CandidateWriteFields) {
@@ -168,6 +178,8 @@ function toRow(fields: CandidateWriteFields) {
     eeo_answers: fields.eeoAnswers,
     application_qa: fields.applicationQa,
     education_history: fields.educationHistory,
+    password_1: fields.password1,
+    password_2: fields.password2,
   };
 }
 

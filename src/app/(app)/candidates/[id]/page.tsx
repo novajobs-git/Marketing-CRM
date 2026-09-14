@@ -212,6 +212,21 @@ export default async function CandidateDetailPage({
               </dl>
             </div>
 
+            {session.role === "ADMIN" && (
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  ATS Application Passwords
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Default passwords for signing into job-application portals (e.g. Workday) for this candidate.
+                </p>
+                <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <FieldRow label="Password 1" value={candidate.password1} />
+                  <FieldRow label="Password 2" value={candidate.password2} />
+                </dl>
+              </div>
+            )}
+
             <div className="rounded-2xl border border-border bg-card p-6">
               <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Resume</h2>
               {baseResumes.length === 0 && (

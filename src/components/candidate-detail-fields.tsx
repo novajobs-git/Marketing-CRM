@@ -36,9 +36,20 @@ export type CandidateDetailDefaults = {
   professionalDetails: ProfessionalDetails;
   educationHistory: [EducationEntry, EducationEntry];
   existingResumeFilename?: string;
+  /** Admin-only ATS application passwords — see the `mode` prop below. */
+  password1?: string;
+  password2?: string;
 };
 
-export function CandidateDetailFields({ defaultValues }: { defaultValues?: CandidateDetailDefaults }) {
+export function CandidateDetailFields({
+  defaultValues,
+  mode = "public",
+}: {
+  defaultValues?: CandidateDetailDefaults;
+  /** "admin" renders the ATS application-password fields; the public intake
+   *  and checklist forms must never see them, so this defaults to "public". */
+  mode?: "admin" | "public";
+}) {
   const [drivingLicense, setDrivingLicense] = useState(
     defaultValues?.professionalDetails.drivingLicense ?? ""
   );
@@ -187,6 +198,28 @@ export function CandidateDetailFields({ defaultValues }: { defaultValues?: Candi
           />
         </div>
       </section>
+
+      {mode === "admin" && (
+        <section className="flex flex-col gap-4">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">ATS Application Passwords</h2>
+            <p className="text-xs text-muted-foreground">
+              Default passwords recruiters use to sign into job-application portals (e.g. Workday)
+              for this candidate. Admin-only — never shown on the intake or checklist forms.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password1">Password 1</Label>
+              <Input id="password1" name="password1" defaultValue={defaultValues?.password1} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password2">Password 2</Label>
+              <Input id="password2" name="password2" defaultValue={defaultValues?.password2} />
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="flex flex-col gap-4">
         <div>

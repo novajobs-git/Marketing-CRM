@@ -27,6 +27,11 @@ export const candidateDetailSchema = z.object({
   veteranStatus: z.string().trim().min(1),
   disabilityStatus: z.string().trim().min(1),
   educationHistory: z.string().trim().min(1),
+  // Admin-only ATS application passwords — never rendered on the public
+  // intake/checklist forms, so formData.get() is always null there and these
+  // stay optional for every shared caller of this schema.
+  password1: z.string().trim().optional(),
+  password2: z.string().trim().optional(),
 });
 
 export type CandidateDetailInput = z.infer<typeof candidateDetailSchema>;
@@ -56,6 +61,8 @@ export function parseCandidateDetailForm(formData: FormData) {
     veteranStatus: formData.get("veteranStatus"),
     disabilityStatus: formData.get("disabilityStatus"),
     educationHistory: formData.get("educationHistory"),
+    password1: formData.get("password1") ?? undefined,
+    password2: formData.get("password2") ?? undefined,
   });
 }
 
@@ -96,6 +103,8 @@ export function candidateDetailToDbFields(data: CandidateDetailInput) {
       jobSearchPriorities: data.jobSearchPriorities,
     },
     educationHistory,
+    password1: data.password1 || null,
+    password2: data.password2 || null,
   };
 }
 
@@ -111,6 +120,8 @@ type CandidateRecordLike = {
   eeoAnswers: unknown;
   applicationQa: unknown;
   educationHistory: unknown;
+  password1: string | null;
+  password2: string | null;
 };
 
 const emptyProfessionalDetails: ProfessionalDetails = {
@@ -161,5 +172,7 @@ export function candidateToFormDefaults(candidate: CandidateRecordLike) {
     eeoAnswers,
     professionalDetails,
     educationHistory,
+    password1: candidate.password1 ?? "",
+    password2: candidate.password2 ?? "",
   };
 }
