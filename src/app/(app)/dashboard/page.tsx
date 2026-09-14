@@ -39,10 +39,11 @@ export default async function DashboardPage({
   if (!session) redirect("/login");
 
   const isAdmin = session.role === "ADMIN";
-  // Admins can drill into any recruiter's exact dashboard (or "All recruiters",
-  // org-wide); a recruiter always sees their own — the query param is theirs
-  // to ignore, never a client-trusted scope.
-  const effectiveRecruiterId = isAdmin ? recruiter || undefined : session.sub;
+  // Admins and team leads can drill into any recruiter's exact dashboard (or
+  // "All recruiters", org-wide); a plain recruiter always sees their own —
+  // the query param is theirs to ignore, never a client-trusted scope.
+  const canViewAllRecruiters = isAdmin || session.isTeamLead;
+  const effectiveRecruiterId = canViewAllRecruiters ? recruiter || undefined : session.sub;
   const sortField: SortField = (["name", "role", "applications", "interviews", "lastActivity"] as const).includes(
     sort as SortField
   )
@@ -59,7 +60,7 @@ export default async function DashboardPage({
     // the org-wide Daily Reports page's existing convention.
     effectiveRecruiterId ? listCandidates(client, { assignedRecruiterId: effectiveRecruiterId }) : Promise.resolve([]),
     countCandidatesByStatus(client, { assignedRecruiterId: effectiveRecruiterId }),
-    isAdmin ? listRecruitersWithCounts(client) : Promise.resolve([]),
+    canViewAllRecruiters ? listRecruitersWithCounts(client) : Promise.resolve([]),
   ]);
 
   const candidateIds = effectiveRecruiterId ? allAssigned.map((c) => c.id) : undefined;
@@ -86,7 +87,7 @@ export default async function DashboardPage({
     reportEntries.reduce((sum, e) => sum + e.interviewsCount, 0);
   const totalProfiles = statusCounts.ACTIVE + statusCounts.UNASSIGNED;
 
-  const showRecruiterColumn = isAdmin && !effectiveRecruiterId;
+  const showRecruiterColumn = canViewAllRecruiters && !effectiveRecruiterId;
 
   const rows = profiles.map((profile) => {
     const c = counts.get(profile.id) ?? { applications: 0, interviews: 0, assessments: 0 };
@@ -138,7 +139,7 @@ export default async function DashboardPage({
         Candidate profiles across the org, with live application activity.
       </p>
 
-      {isAdmin && (
+      {canViewAllRecruiters && (
         <form className="mt-6 flex items-center gap-2" method="get">
           {q && <input type="hidden" name="q" value={q} />}
           <label htmlFor="recruiter" className="text-sm text-muted-foreground">

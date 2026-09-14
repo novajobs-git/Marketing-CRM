@@ -25,6 +25,9 @@ export default async function AdminProfilesPage({
 }) {
   const [session, { q, recruiter, view: rawView }] = await Promise.all([requireSession(), searchParams]);
   const isAdmin = session.role === "ADMIN";
+  // Reassignment is also open to team leads; every other admin-only action on
+  // this page (adding a candidate, approving intake, archiving) is not.
+  const canReassign = isAdmin || session.isTeamLead;
   const activeView = VIEWS.find((v) => v.key === rawView)?.key ?? "all";
 
   const client = createSupabaseServerClient();
@@ -151,7 +154,12 @@ export default async function AdminProfilesPage({
         </form>
 
         <div className="mt-6">
-          <ProfilesTable profiles={profiles} recruiters={activeRecruiters} canManage={isAdmin} />
+          <ProfilesTable
+            profiles={profiles}
+            recruiters={activeRecruiters}
+            canReassign={canReassign}
+            canArchive={isAdmin}
+          />
         </div>
       </div>
     </div>

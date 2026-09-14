@@ -91,9 +91,12 @@ export default async function AdminUsersPage({
                   </TableCell>
                   <TableCell className="text-muted-foreground">{recruiter.email}</TableCell>
                   <TableCell>
-                    <Badge variant={recruiter.status === "ACTIVE" ? "success" : "outline"}>
-                      {recruiter.status === "ACTIVE" ? "Active" : "Inactive"}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={recruiter.status === "ACTIVE" ? "success" : "outline"}>
+                        {recruiter.status === "ACTIVE" ? "Active" : "Inactive"}
+                      </Badge>
+                      {recruiter.isTeamLead && <Badge variant="secondary">Team Lead</Badge>}
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     <Link
@@ -107,6 +110,7 @@ export default async function AdminUsersPage({
                     <RecruiterRowActions
                       userId={recruiter.id}
                       status={recruiter.status}
+                      isTeamLead={recruiter.isTeamLead}
                       assignedCount={recruiter.assignedProfileCount}
                       otherRecruiters={recruiters
                         .filter((r) => r.id !== recruiter.id && r.status === "ACTIVE")

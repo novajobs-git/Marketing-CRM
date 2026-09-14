@@ -16,10 +16,12 @@ export function UserMenu({
   name,
   email,
   role,
+  isTeamLead = false,
 }: {
   name: string;
   email: string;
   role: "ADMIN" | "RECRUITER";
+  isTeamLead?: boolean;
 }) {
   const { signOut } = useClerk();
   const [pending, startTransition] = useTransition();
@@ -37,7 +39,7 @@ export function UserMenu({
           <p className="text-sm font-medium text-foreground">{name}</p>
           <p className="text-xs text-muted-foreground">{email}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {role === "ADMIN" ? "Admin" : "Recruiter"}
+            {role === "ADMIN" ? "Admin" : isTeamLead ? "Recruiter · Team Lead" : "Recruiter"}
           </p>
         </div>
         <DropdownMenuSeparator />

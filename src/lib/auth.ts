@@ -14,6 +14,8 @@ export type SessionPayload = {
   role: UserRole;
   name: string;
   email: string;
+  /** App-level flag, independent of `role`/Clerk's org role — see authz.ts. */
+  isTeamLead: boolean;
 };
 
 // Clerk's built-in org roles map directly onto this app's two roles — no
@@ -72,7 +74,7 @@ export const getSession = cache(async (): Promise<SessionPayload | null> => {
     await upsertUser(supabaseAdmin, { id: userId, name, email, role, status: "ACTIVE" });
   }
 
-  return { sub: userId, role, name, email };
+  return { sub: userId, role, name, email, isTeamLead: existing?.isTeamLead ?? false };
 });
 
 export async function requireSession(): Promise<SessionPayload> {
@@ -84,5 +86,12 @@ export async function requireSession(): Promise<SessionPayload> {
 export async function requireAdmin(): Promise<SessionPayload> {
   const session = await requireSession();
   if (session.role !== "ADMIN") throw new Error("Admin access required");
+  return session;
+}
+
+/** Candidate-recruiter reassignment — admins and team leads. */
+export async function requireReassignAccess(): Promise<SessionPayload> {
+  const session = await requireSession();
+  if (session.role !== "ADMIN" && !session.isTeamLead) throw new Error("Reassign access required");
   return session;
 }

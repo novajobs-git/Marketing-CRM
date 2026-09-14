@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { clerkClient } from "@clerk/nextjs/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { findUserByEmail, findUserById, updateUserStatus, deleteUserRow } from "@/lib/repo/users";
+import {
+  findUserByEmail,
+  findUserById,
+  updateUserStatus,
+  updateTeamLeadStatus,
+  deleteUserRow,
+} from "@/lib/repo/users";
 import { reassignAllProfiles as reassignAllProfilesRepo } from "@/lib/repo/candidates";
 import { requireAdmin } from "@/lib/auth";
 
@@ -78,6 +84,24 @@ export async function toggleRecruiterStatus(userId: string): Promise<ActionState
   }
 
   await updateUserStatus(client, userId, nextStatus);
+
+  revalidatePath("/admin/users");
+  return null;
+}
+
+// Team Lead is an app-level flag layered on top of a recruiter's normal
+// Clerk org role — see src/lib/authz.ts. Grants org-wide report add/view
+// access and candidate-recruiter reassignment; nothing else (admin-only
+// actions like add-candidate, approve/reject intake, and delete are
+// unaffected — they're gated separately and don't check this flag).
+export async function toggleTeamLead(userId: string): Promise<ActionState> {
+  await requireAdmin();
+  const client = createSupabaseServerClient();
+
+  const user = await findUserById(client, userId);
+  if (!user || user.role !== "RECRUITER") return { error: "Recruiter not found." };
+
+  await updateTeamLeadStatus(client, userId, !user.isTeamLead);
 
   revalidatePath("/admin/users");
   return null;

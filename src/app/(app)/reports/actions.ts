@@ -10,7 +10,7 @@ import {
   updateReportEntry as updateReportEntryRepo,
 } from "@/lib/repo/report-entries";
 import { requireSession } from "@/lib/auth";
-import { canAccessCandidate, canEditReportEntry } from "@/lib/authz";
+import { canManageReportsForCandidate, canEditReportEntry } from "@/lib/authz";
 
 export type ActionState = { error?: string } | null;
 
@@ -34,7 +34,7 @@ export async function createReportEntry(
 
   const candidate = await findCandidateById(client, candidateId);
   if (!candidate) return { error: "Profile not found." };
-  if (!canAccessCandidate(session, candidate)) return { error: "Not authorized." };
+  if (!canManageReportsForCandidate(session, candidate)) return { error: "Not authorized." };
 
   const parsed = reportSchema.safeParse({
     date: formData.get("date"),

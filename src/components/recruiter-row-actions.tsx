@@ -34,18 +34,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toggleRecruiterStatus, deleteRecruiter, reassignAllProfiles } from "@/app/(app)/admin/users/actions";
+import {
+  toggleRecruiterStatus,
+  toggleTeamLead,
+  deleteRecruiter,
+  reassignAllProfiles,
+} from "@/app/(app)/admin/users/actions";
 
 const UNASSIGN_VALUE = "__unassign__";
 
 export function RecruiterRowActions({
   userId,
   status,
+  isTeamLead,
   assignedCount,
   otherRecruiters,
 }: {
   userId: string;
   status: "ACTIVE" | "INACTIVE";
+  isTeamLead: boolean;
   assignedCount: number;
   otherRecruiters: { id: string; name: string }[];
 }) {
@@ -81,6 +88,9 @@ export function RecruiterRowActions({
             onClick={() => startTransition(() => void toggleRecruiterStatus(userId))}
           >
             {status === "ACTIVE" ? "Deactivate" : "Reactivate"}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => startTransition(() => void toggleTeamLead(userId))}>
+            {isTeamLead ? "Remove team lead" : "Make team lead"}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"

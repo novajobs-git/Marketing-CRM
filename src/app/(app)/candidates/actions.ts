@@ -12,7 +12,7 @@ import {
   findCandidateById,
 } from "@/lib/repo/candidates";
 import { createResumeFile, findResumeFileById, deleteResumeFile } from "@/lib/repo/resume-files";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requireReassignAccess } from "@/lib/auth";
 import { uploadObject, deleteObject } from "@/lib/storage";
 import { parseCandidateDetailForm, candidateDetailToDbFields } from "@/lib/candidate-form-schema";
 import { checkResumeFile } from "@/lib/file-validation";
@@ -94,11 +94,13 @@ export async function bulkArchiveCandidateProfiles(candidateIds: string[]): Prom
 
 // FR-2.4 — bulk assign/reassign one or more candidate profiles to a recruiter (or unassign).
 // Archived profiles keep their ARCHIVED status; only the recruiter assignment moves for those.
+// Admins and team leads only (see requireReassignAccess) — everything else on
+// this action's page (adding/archiving a profile) stays admin-only.
 export async function bulkReassignCandidateProfiles(
   candidateIds: string[],
   recruiterId: string | null
 ): Promise<void> {
-  await requireAdmin();
+  await requireReassignAccess();
   await bulkReassignCandidates(createSupabaseServerClient(), candidateIds, recruiterId);
   revalidatePath("/admin/profiles");
   revalidatePath("/admin/users");

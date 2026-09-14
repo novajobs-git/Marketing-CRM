@@ -45,7 +45,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="flex shrink-0 items-center justify-between border-t border-border px-1 pt-3">
-          <UserMenu name={session.name} email={session.email} role={session.role} />
+          <UserMenu
+            name={session.name}
+            email={session.email}
+            role={session.role}
+            isTeamLead={session.isTeamLead}
+          />
           {session.role === "ADMIN" && <QuickAddMenu />}
         </div>
       </aside>

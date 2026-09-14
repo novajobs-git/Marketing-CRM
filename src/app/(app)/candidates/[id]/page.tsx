@@ -6,9 +6,10 @@ import { findCandidateById } from "@/lib/repo/candidates";
 import { listResumeFilesForCandidate } from "@/lib/repo/resume-files";
 import { listApplicationsForCandidate } from "@/lib/repo/applications";
 import { listReportEntriesForCandidate } from "@/lib/repo/report-entries";
-import { canAccessCandidate } from "@/lib/authz";
+import { canAccessCandidate, canManageReportsForCandidate } from "@/lib/authz";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsIndicator, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -38,7 +39,7 @@ import { EditReportDialog } from "@/components/edit-report-dialog";
 import { CopyButton } from "@/components/copy-button";
 import { cn } from "@/lib/utils";
 import { canEditReportEntry } from "@/lib/authz";
-import { Plus } from "lucide-react";
+import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
   ACTIVE: "Active",
@@ -87,14 +88,16 @@ const APPLICATION_STATUS_LABEL: Record<string, string> = {
   WITHDRAWN: "Withdrawn",
 };
 
+const RESUME_EDITS_PAGE_SIZE = 10;
+
 export default async function CandidateDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
 }) {
-  const [session, { id }, { tab }] = await Promise.all([getSession(), params, searchParams]);
+  const [session, { id }, { tab, q, page }] = await Promise.all([getSession(), params, searchParams]);
   if (!session) redirect("/login");
 
   const client = createSupabaseServerClient();
@@ -103,6 +106,9 @@ export default async function CandidateDetailPage({
   // Every recruiter can view every profile; logging activity (applications,
   // reports) against it stays scoped to admins/the assigned recruiter.
   const canManage = canAccessCandidate(session, candidate);
+  // Reports specifically are also open to team leads for any candidate, not
+  // just their own assigned ones — see canManageReportsForCandidate.
+  const canManageReports = canManageReportsForCandidate(session, candidate);
 
   const [resumeFiles, applications, reportEntries] = await Promise.all([
     listResumeFilesForCandidate(client, id),
@@ -114,14 +120,58 @@ export default async function CandidateDetailPage({
   const qa = candidate.applicationQa as ProfessionalDetails | null;
   const education = (candidate.educationHistory as EducationEntry[] | null) ?? [];
   const baseResumes = resumeFiles.filter((r) => !r.isTailoredVersion);
-  // Manual-entry only, not a count of logged Applications/Resume Edits below —
-  // a Resume Edit is a tailored resume/JD pair, not necessarily one real
-  // submitted application, so recruiters log the real total via Reports.
-  const totalApplications = reportEntries.reduce((sum, e) => sum + e.applicationsCount, 0);
+  // The Resume Edits tab's total is a literal count of the rows in that
+  // section (tailored resume/JD pairs) — distinct from the Reports/dashboard
+  // "Total applications" figure, which is manual-entry only (report_entries),
+  // never resume-edit rows. Two different numbers, on purpose.
+  const totalApplications = applications.length;
 
   const activeTab = ["details", "resume-edits", "reports"].includes(tab ?? "")
     ? tab!
     : "details";
+
+  const resumeEditsQuery = (q ?? "").trim().toLowerCase();
+  const filteredApplications = resumeEditsQuery
+    ? applications.filter(
+        (app) =>
+          (app.jobDescription.sourceNote ?? "").toLowerCase().includes(resumeEditsQuery) ||
+          app.resumeFile.filename.toLowerCase().includes(resumeEditsQuery)
+      )
+    : applications;
+  const resumeEditsTotalPages = Math.max(
+    1,
+    Math.ceil(filteredApplications.length / RESUME_EDITS_PAGE_SIZE)
+  );
+  const resumeEditsPage = Math.min(
+    Math.max(1, parseInt(page ?? "1", 10) || 1),
+    resumeEditsTotalPages
+  );
+  const pagedApplications = filteredApplications.slice(
+    (resumeEditsPage - 1) * RESUME_EDITS_PAGE_SIZE,
+    resumeEditsPage * RESUME_EDITS_PAGE_SIZE
+  );
+
+  function resumeEditsHref(targetPage: number) {
+    const params = new URLSearchParams({ tab: "resume-edits" });
+    if (q) params.set("q", q);
+    if (targetPage > 1) params.set("page", String(targetPage));
+    return `/candidates/${id}?${params.toString()}`;
+  }
+
+  // Caps the numbered-page row at 7 slots (first, last, current ±2, "…"
+  // fillers) so a candidate with dozens of resume edits doesn't produce an
+  // unbounded row of page buttons.
+  function resumeEditsPageNumbers(current: number, total: number): (number | "ellipsis")[] {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = new Set([1, total, current, current - 1, current - 2, current + 1, current + 2]);
+    const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+    const result: (number | "ellipsis")[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      if (i > 0 && sorted[i]! - sorted[i - 1]! > 1) result.push("ellipsis");
+      result.push(sorted[i]!);
+    }
+    return result;
+  }
 
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -333,6 +383,32 @@ export default async function CandidateDetailPage({
               </div>
             </div>
 
+            <form className="mt-4 flex items-center gap-2" method="get">
+              <input type="hidden" name="tab" value="resume-edits" />
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  name="q"
+                  defaultValue={q}
+                  placeholder="Search job description or resume filename…"
+                  className="w-72 pl-8"
+                />
+              </div>
+              <Button type="submit" variant="secondary" size="sm">
+                Search
+              </Button>
+              {q && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  nativeButton={false}
+                  render={<Link href={`/candidates/${id}?tab=resume-edits`} />}
+                >
+                  Clear
+                </Button>
+              )}
+            </form>
+
             <div className="mt-4">
               <Table>
                 <TableHeader>
@@ -344,14 +420,14 @@ export default async function CandidateDetailPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {applications.length === 0 && (
+                  {pagedApplications.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
-                        No applications logged yet.
+                        {resumeEditsQuery ? "No applications match your search." : "No applications logged yet."}
                       </TableCell>
                     </TableRow>
                   )}
-                  {applications.map((app) => (
+                  {pagedApplications.map((app) => (
                     <TableRow key={app.id}>
                       <TableCell className="text-muted-foreground">
                         <Link
@@ -394,6 +470,65 @@ export default async function CandidateDetailPage({
                 </TableBody>
               </Table>
             </div>
+
+            {filteredApplications.length > 0 && (
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Showing {(resumeEditsPage - 1) * RESUME_EDITS_PAGE_SIZE + 1}–
+                  {Math.min(resumeEditsPage * RESUME_EDITS_PAGE_SIZE, filteredApplications.length)} of{" "}
+                  {filteredApplications.length}
+                </p>
+                {resumeEditsTotalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    {resumeEditsPage === 1 ? (
+                      <Button variant="ghost" size="icon-sm" disabled aria-label="Previous page">
+                        <ChevronLeft />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        nativeButton={false}
+                        render={<Link href={resumeEditsHref(resumeEditsPage - 1)} aria-label="Previous page" />}
+                      >
+                        <ChevronLeft />
+                      </Button>
+                    )}
+                    {resumeEditsPageNumbers(resumeEditsPage, resumeEditsTotalPages).map((p, i) =>
+                      p === "ellipsis" ? (
+                        <span key={`ellipsis-${i}`} className="px-1 text-sm text-muted-foreground">
+                          …
+                        </span>
+                      ) : (
+                        <Button
+                          key={p}
+                          variant={p === resumeEditsPage ? "default" : "ghost"}
+                          size="icon-sm"
+                          nativeButton={false}
+                          render={<Link href={resumeEditsHref(p)} />}
+                        >
+                          {p}
+                        </Button>
+                      )
+                    )}
+                    {resumeEditsPage === resumeEditsTotalPages ? (
+                      <Button variant="ghost" size="icon-sm" disabled aria-label="Next page">
+                        <ChevronRight />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        nativeButton={false}
+                        render={<Link href={resumeEditsHref(resumeEditsPage + 1)} aria-label="Next page" />}
+                      >
+                        <ChevronRight />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="reports" className="mt-6">
@@ -410,7 +545,7 @@ export default async function CandidateDetailPage({
                 >
                   View full reports
                 </Button>
-                {canManage && <AddReportDialog candidateId={candidate.id} />}
+                {canManageReports && <AddReportDialog candidateId={candidate.id} />}
               </div>
             </div>
 

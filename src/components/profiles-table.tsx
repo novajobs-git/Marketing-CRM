@@ -47,15 +47,18 @@ export type ProfileRow = {
 export function ProfilesTable({
   profiles,
   recruiters,
-  canManage = false,
+  canReassign = false,
+  canArchive = false,
 }: {
   profiles: ProfileRow[];
   recruiters: { id: string; name: string }[];
-  /** Bulk archive/reassign is an admin-only action — recruiters get a
-   *  read-only view of the same table (no checkboxes, no bulk-action bar). */
-  canManage?: boolean;
+  /** Bulk reassignment — admins and team leads. */
+  canReassign?: boolean;
+  /** Bulk archive — admin-only. */
+  canArchive?: boolean;
 }) {
   const router = useRouter();
+  const canManage = canReassign || canArchive;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [reassignTarget, setReassignTarget] = useState("");
   const [pending, startTransition] = useTransition();
@@ -100,36 +103,42 @@ export function ProfilesTable({
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 px-4 py-2">
           <span className="text-sm text-foreground">{selected.size} selected</span>
           <div className="flex items-center gap-2">
-            <Select value={reassignTarget} onValueChange={(v) => setReassignTarget(v ?? "")}>
-              <SelectTrigger className="w-44" size="sm">
-                <SelectValue placeholder="Reassign to…">
-                  {(v: string | null) =>
-                    v === UNASSIGN_VALUE
-                      ? "Unassign"
-                      : (recruiters.find((r) => r.id === v)?.name ?? "Reassign to…")
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={UNASSIGN_VALUE}>Unassign</SelectItem>
-                {recruiters.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pending || !reassignTarget}
-              onClick={reassignSelected}
-            >
-              {pending ? <Loader2Icon className="animate-spin" /> : "Reassign"}
-            </Button>
-            <Button variant="outline" size="sm" disabled={pending} onClick={archiveSelected}>
-              {pending ? <Loader2Icon className="animate-spin" /> : "Archive selected"}
-            </Button>
+            {canReassign && (
+              <>
+                <Select value={reassignTarget} onValueChange={(v) => setReassignTarget(v ?? "")}>
+                  <SelectTrigger className="w-44" size="sm">
+                    <SelectValue placeholder="Reassign to…">
+                      {(v: string | null) =>
+                        v === UNASSIGN_VALUE
+                          ? "Unassign"
+                          : (recruiters.find((r) => r.id === v)?.name ?? "Reassign to…")
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={UNASSIGN_VALUE}>Unassign</SelectItem>
+                    {recruiters.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pending || !reassignTarget}
+                  onClick={reassignSelected}
+                >
+                  {pending ? <Loader2Icon className="animate-spin" /> : "Reassign"}
+                </Button>
+              </>
+            )}
+            {canArchive && (
+              <Button variant="outline" size="sm" disabled={pending} onClick={archiveSelected}>
+                {pending ? <Loader2Icon className="animate-spin" /> : "Archive selected"}
+              </Button>
+            )}
           </div>
         </div>
       )}

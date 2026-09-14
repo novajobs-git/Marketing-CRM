@@ -12,7 +12,7 @@ import {
   buildWeeklyBars,
   computeTodayWeekMonth,
 } from "@/lib/report-metrics";
-import { canAccessCandidate, canEditReportEntry } from "@/lib/authz";
+import { canManageReportsForCandidate, canEditReportEntry } from "@/lib/authz";
 import { StatRow } from "@/components/stat-row";
 import { ToggleBarChart } from "@/components/toggle-bar-chart";
 import { AddReportDialog } from "@/components/add-report-dialog";
@@ -47,7 +47,7 @@ export default async function CandidateFullReportsPage({
   const candidate = await findCandidateById(client, id);
   if (!candidate) notFound();
 
-  const canManage = canAccessCandidate(session, candidate);
+  const canManage = canManageReportsForCandidate(session, candidate);
   const fromDate = from ? new Date(from) : undefined;
   const toDate = to ? new Date(to) : undefined;
   const now = new Date();

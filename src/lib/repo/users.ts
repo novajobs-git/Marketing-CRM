@@ -10,6 +10,8 @@ export type AppUser = {
   email: string;
   role: UserRole;
   status: UserStatus;
+  /** App-level flag, independent of the Clerk org role — see src/lib/authz.ts. */
+  isTeamLead: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -22,9 +24,12 @@ type UserRow = {
   email: string;
   role: UserRole;
   status: UserStatus;
+  is_team_lead: boolean;
   created_at: string;
   updated_at: string;
 };
+
+const USER_COLUMNS = "id, name, email, role, status, is_team_lead, created_at, updated_at";
 
 function mapUser(row: UserRow): AppUser {
   return {
@@ -33,6 +38,7 @@ function mapUser(row: UserRow): AppUser {
     email: row.email,
     role: row.role,
     status: row.status,
+    isTeamLead: row.is_team_lead,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -44,21 +50,13 @@ function throwIfError<T>(res: { data: T; error: { message: string; code?: string
 }
 
 export async function findUserById(client: SupabaseClient, id: string): Promise<AppUser | null> {
-  const res = await client
-    .from("users")
-    .select("id, name, email, role, status, created_at, updated_at")
-    .eq("id", id)
-    .maybeSingle();
+  const res = await client.from("users").select(USER_COLUMNS).eq("id", id).maybeSingle();
   const data = throwIfError(res as never) as UserRow | null;
   return data ? mapUser(data) : null;
 }
 
 export async function findUserByEmail(client: SupabaseClient, email: string): Promise<AppUser | null> {
-  const res = await client
-    .from("users")
-    .select("id, name, email, role, status, created_at, updated_at")
-    .eq("email", email)
-    .maybeSingle();
+  const res = await client.from("users").select(USER_COLUMNS).eq("email", email).maybeSingle();
   const data = throwIfError(res as never) as UserRow | null;
   return data ? mapUser(data) : null;
 }
@@ -78,6 +76,15 @@ export async function updateUserStatus(client: SupabaseClient, id: string, statu
   throwIfError(res as never);
 }
 
+export async function updateTeamLeadStatus(
+  client: SupabaseClient,
+  id: string,
+  isTeamLead: boolean
+): Promise<void> {
+  const res = await client.from("users").update({ is_team_lead: isTeamLead }).eq("id", id).eq("role", "RECRUITER");
+  throwIfError(res as never);
+}
+
 export async function deleteUserRow(client: SupabaseClient, id: string): Promise<void> {
   const res = await client.from("users").delete().eq("id", id).eq("role", "RECRUITER");
   throwIfError(res as never);
@@ -89,7 +96,7 @@ export async function listRecruiters(
 ): Promise<AppUser[]> {
   let query = client
     .from("users")
-    .select("id, name, email, role, status, created_at, updated_at")
+    .select(USER_COLUMNS)
     .eq("role", "RECRUITER")
     .order("name", { ascending: true });
   if (opts.status) query = query.eq("status", opts.status);
