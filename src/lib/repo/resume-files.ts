@@ -115,3 +115,12 @@ export async function createResumeFile(
     .single();
   return throwIfError(res as never) as { id: string };
 }
+
+/** DB-row delete only — the caller is responsible for also removing the
+ *  underlying object from R2 (see src/lib/storage.ts's deleteObject). Fails
+ *  with a Postgres FK-violation (code 23503) if an application still
+ *  references this resume via applications.resume_file_id. */
+export async function deleteResumeFile(client: SupabaseClient, id: string): Promise<void> {
+  const res = await client.from("resume_files").delete().eq("id", id);
+  throwIfError(res as never);
+}

@@ -107,17 +107,26 @@ export async function createReportEntry(
   throwIfError(res as never);
 }
 
+export type ReportEntryWithAuthor = ReportEntry & { createdByName: string };
+
 export async function listReportEntriesForCandidate(
   client: SupabaseClient,
-  candidateId: string
-): Promise<ReportEntry[]> {
-  const res = await client
+  candidateId: string,
+  opts: { from?: Date; to?: Date } = {}
+): Promise<ReportEntryWithAuthor[]> {
+  let query = client
     .from("report_entries")
-    .select("id, candidate_id, date, applications_count, interviews_count, offers_count, notes, created_by_id, created_at")
+    .select(
+      "id, candidate_id, date, applications_count, interviews_count, offers_count, notes, created_by_id, created_at, created_by:users(name)"
+    )
     .eq("candidate_id", candidateId)
     .order("date", { ascending: false });
-  const data = throwIfError(res as never) as ReportEntryRow[];
-  return data.map(mapReportEntry);
+  if (opts.from) query = query.gte("date", opts.from.toISOString().slice(0, 10));
+  if (opts.to) query = query.lte("date", opts.to.toISOString().slice(0, 10));
+
+  const res = await query;
+  const data = throwIfError(res as never) as (ReportEntryRow & { created_by: { name: string } | null })[];
+  return data.map((row) => ({ ...mapReportEntry(row), createdByName: row.created_by?.name ?? "—" }));
 }
 
 export async function findReportEntryById(

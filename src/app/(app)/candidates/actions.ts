@@ -11,9 +11,9 @@ import {
   bulkReassignCandidates,
   findCandidateById,
 } from "@/lib/repo/candidates";
-import { createResumeFile } from "@/lib/repo/resume-files";
+import { createResumeFile, findResumeFileById, deleteResumeFile } from "@/lib/repo/resume-files";
 import { requireAdmin } from "@/lib/auth";
-import { uploadObject } from "@/lib/storage";
+import { uploadObject, deleteObject } from "@/lib/storage";
 import { parseCandidateDetailForm, candidateDetailToDbFields } from "@/lib/candidate-form-schema";
 import { checkResumeFile } from "@/lib/file-validation";
 
@@ -109,4 +109,39 @@ export async function unarchiveCandidateProfile(candidateId: string): Promise<vo
   await unarchiveCandidate(createSupabaseServerClient(), candidateId);
   revalidatePath("/admin/profiles");
   revalidatePath(`/candidates/${candidateId}`);
+}
+
+// Admin-only attachment removal. Deletes the DB row first — if a
+// resume is still linked to a logged application (applications.resume_file_id
+// has no ON DELETE clause), that delete fails with a 23503 FK violation and
+// the R2 object is left untouched. Only on a successful row delete do we
+// remove the underlying object from R2, so a partial failure never leaves a
+// dangling app reference pointing at a deleted file.
+export async function deleteResumeFileAction(
+  resumeFileId: string,
+  candidateId: string
+): Promise<ActionState> {
+  await requireAdmin();
+  const client = createSupabaseServerClient();
+
+  const resume = await findResumeFileById(client, resumeFileId);
+  if (!resume || resume.candidateId !== candidateId) {
+    return { error: "Attachment not found." };
+  }
+
+  try {
+    await deleteResumeFile(client, resumeFileId);
+  } catch (err) {
+    if (err instanceof Error && (err as Error & { code?: string }).code === "23503") {
+      return {
+        error: "This resume is linked to a logged application and can't be deleted.",
+      };
+    }
+    throw err;
+  }
+
+  await deleteObject(resume.storageKey);
+
+  revalidatePath(`/candidates/${candidateId}`);
+  return null;
 }

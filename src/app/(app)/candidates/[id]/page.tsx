@@ -32,6 +32,7 @@ import {
   type EducationEntry,
 } from "@/lib/candidate-fields";
 import { ArchiveProfileButton } from "@/components/archive-profile-button";
+import { DeleteResumeFileButton } from "@/components/delete-resume-file-button";
 import { AddReportDialog } from "@/components/add-report-dialog";
 import { EditReportDialog } from "@/components/edit-report-dialog";
 import { CopyButton } from "@/components/copy-button";
@@ -235,15 +236,24 @@ export default async function CandidateDetailPage({
               )}
               <ul className="mt-3 flex flex-col gap-2">
                 {baseResumes.map((resume) => (
-                  <li key={resume.id} className="flex items-center justify-between">
-                    <span className="text-sm text-foreground">{resume.filename}</span>
-                    <Button
-                      size="sm"
-                      nativeButton={false}
-                      render={<a href={`/api/resumes/${resume.id}`} target="_blank" rel="noreferrer" />}
-                    >
-                      View PDF
-                    </Button>
+                  <li key={resume.id} className="flex items-center justify-between gap-2">
+                    <span className="truncate text-sm text-foreground">{resume.filename}</span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        size="sm"
+                        nativeButton={false}
+                        render={<a href={`/api/resumes/${resume.id}`} target="_blank" rel="noreferrer" />}
+                      >
+                        View PDF
+                      </Button>
+                      {session.role === "ADMIN" && (
+                        <DeleteResumeFileButton
+                          resumeFileId={resume.id}
+                          candidateId={candidate.id}
+                          filename={resume.filename}
+                        />
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -382,7 +392,7 @@ export default async function CandidateDetailPage({
                   variant="outline"
                   size="sm"
                   nativeButton={false}
-                  render={<Link href={`/reports?candidate=${candidate.id}`} />}
+                  render={<Link href={`/candidates/${candidate.id}/reports`} />}
                 >
                   View full reports
                 </Button>
