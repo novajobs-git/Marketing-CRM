@@ -9,6 +9,7 @@ import { listReportEntriesForCandidate } from "@/lib/repo/report-entries";
 import { canAccessCandidate } from "@/lib/authz";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsIndicator, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -181,15 +182,30 @@ export default async function CandidateDetailPage({
                 <FieldRow
                   label="Address"
                   value={[candidate.address, candidate.state, candidate.zipCode].filter(Boolean).join(", ")}
-                  className="sm:col-span-2"
                 />
+                <FieldRow label="LinkedIn" value={qa?.linkedin} />
               </dl>
+
+              {session.role === "ADMIN" && (
+                <>
+                  <Separator className="my-4" />
+                  <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    ATS Application Passwords
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Default passwords for signing into job-application portals (e.g. Workday) for this candidate.
+                  </p>
+                  <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <FieldRow label="Password 1" value={candidate.password1} />
+                    <FieldRow label="Password 2" value={candidate.password2} />
+                  </dl>
+                </>
+              )}
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6">
               <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Professional details</h2>
               <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <FieldRow label="LinkedIn" value={qa?.linkedin} />
                 <FieldRow label="Driving Licence" value={optionLabel(YES_NO_OPTIONS, qa?.drivingLicense)} />
                 <FieldRow label="Visa Status" value={optionLabel(VISA_STATUS_OPTIONS, qa?.visaStatus)} />
                 <FieldRow label="EAD End Date" value={qa?.eadEndDate} />
@@ -211,21 +227,6 @@ export default async function CandidateDetailPage({
                 />
               </dl>
             </div>
-
-            {session.role === "ADMIN" && (
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                  ATS Application Passwords
-                </h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Default passwords for signing into job-application portals (e.g. Workday) for this candidate.
-                </p>
-                <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <FieldRow label="Password 1" value={candidate.password1} />
-                  <FieldRow label="Password 2" value={candidate.password2} />
-                </dl>
-              </div>
-            )}
 
             <div className="rounded-2xl border border-border bg-card p-6">
               <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Resume</h2>

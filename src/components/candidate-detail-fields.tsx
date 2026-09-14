@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/ui/date-picker";
 import { LabeledSelect } from "@/components/labeled-select";
 import { ResumeFileUpload } from "@/components/resume-file-upload";
@@ -86,9 +87,15 @@ export function CandidateDetailFields({
           </div>
           <DatePicker label="DOB" name="dob" isRequired defaultValue={defaultValues?.dob} />
         </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="address">Address</Label>
-          <Input id="address" name="address" required defaultValue={defaultValues?.address} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="address">Address</Label>
+            <Input id="address" name="address" required defaultValue={defaultValues?.address} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="linkedin">LinkedIn</Label>
+            <Input id="linkedin" name="linkedin" defaultValue={defaultValues?.professionalDetails.linkedin} />
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
@@ -100,19 +107,36 @@ export function CandidateDetailFields({
             <Input id="zipCode" name="zipCode" required defaultValue={defaultValues?.zipCode} />
           </div>
         </div>
+
+        {mode === "admin" && (
+          <>
+            <Separator />
+            <div>
+              <h3 className="text-sm font-medium text-foreground">ATS Application Passwords</h3>
+              <p className="text-xs text-muted-foreground">
+                Default passwords recruiters use to sign into job-application portals (e.g. Workday)
+                for this candidate. Admin-only — never shown on the intake or checklist forms.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password1">Password 1</Label>
+                <Input id="password1" name="password1" defaultValue={defaultValues?.password1} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password2">Password 2</Label>
+                <Input id="password2" name="password2" defaultValue={defaultValues?.password2} />
+              </div>
+            </div>
+          </>
+        )}
       </section>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-sm font-medium text-foreground">Professional details</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="role">Target Job Title</Label>
-            <Input id="role" name="role" required defaultValue={defaultValues?.role} />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="linkedin">LinkedIn</Label>
-            <Input id="linkedin" name="linkedin" defaultValue={defaultValues?.professionalDetails.linkedin} />
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="role">Target Job Title</Label>
+          <Input id="role" name="role" required defaultValue={defaultValues?.role} />
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="topSkills">Top 5 Skills</Label>
@@ -198,28 +222,6 @@ export function CandidateDetailFields({
           />
         </div>
       </section>
-
-      {mode === "admin" && (
-        <section className="flex flex-col gap-4">
-          <div>
-            <h2 className="text-sm font-medium text-foreground">ATS Application Passwords</h2>
-            <p className="text-xs text-muted-foreground">
-              Default passwords recruiters use to sign into job-application portals (e.g. Workday)
-              for this candidate. Admin-only — never shown on the intake or checklist forms.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password1">Password 1</Label>
-              <Input id="password1" name="password1" defaultValue={defaultValues?.password1} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password2">Password 2</Label>
-              <Input id="password2" name="password2" defaultValue={defaultValues?.password2} />
-            </div>
-          </div>
-        </section>
-      )}
 
       <section className="flex flex-col gap-4">
         <div>
