@@ -89,15 +89,19 @@ export default async function ReportsPage({
     c.offers += entry.offersCount;
   }
 
-  // FR-8.5 — additive to counts derived from logged Application records.
+  // Resume Edits (logged Application records) never add to the applications
+  // total — that figure is manual-entry only (report_entries, above), per
+  // src/lib/report-metrics.ts's buildByDayMap. A Resume Edit is a tailored
+  // resume/JD pair, not necessarily one real submitted application, so
+  // counting it here would double-count against what the recruiter already
+  // reported. Interviews/offers still reflect the application's current
+  // status, same as the dashboard and per-candidate Reports screen.
   for (const app of applications) {
     const key = app.appliedDate.toISOString().slice(0, 10);
     const day = dayBucket(key);
-    day.applications += 1;
     if (app.status === "INTERVIEW") day.interviews += 1;
     if (app.status === "OFFER") day.offers += 1;
     const c = candidateBucket(day, app.candidateId, app.candidateName);
-    c.applications += 1;
     if (app.status === "INTERVIEW") c.interviews += 1;
     if (app.status === "OFFER") c.offers += 1;
   }
