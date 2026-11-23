@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { findApplicationById } from "@/lib/repo/applications";
 import { canAccessCandidate } from "@/lib/authz";
 import { ApplicationStatusSelect } from "@/components/application-status-select";
+import { BackLink } from "@/components/back-link";
 import { Badge } from "@/components/ui/badge";
 import { JdViewer } from "@/components/jd-editor";
 import type { JSONContent } from "@tiptap/react";
@@ -34,12 +34,12 @@ export default async function ApplicationDetailPage({
 
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-      <Link
-        href={`/candidates/${id}?tab=resume-edits`}
+      <BackLink
+        fallbackHref={`/candidates/${id}?tab=resume-edits`}
         className="text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to {application.candidate.name}
-      </Link>
+      </BackLink>
 
       <div className="mt-3 flex items-center justify-between gap-4">
         <div>
