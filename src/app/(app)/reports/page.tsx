@@ -182,7 +182,6 @@ export default async function ReportsPage({
           <Button
             variant="ghost"
             size="sm"
-            nativeButton={false}
             render={<Link href={candidateId ? `/reports?candidate=${candidateId}` : "/reports"} />}
           >
             Clear

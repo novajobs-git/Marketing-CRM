@@ -79,7 +79,7 @@ export function CreateChecklistTemplateDialog() {
 
         <form ref={formRef} action={formAction} className="flex max-h-[70vh] flex-col gap-6 overflow-y-auto">
           {state?.error && (
-            <Alert variant="destructive">
+            <Alert variant="error">
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           )}

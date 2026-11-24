@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Briefcase, LayoutDashboard, Users, IdCard, ClipboardList, ListChecks } from "lucide-react";
+import Image from "next/image";
+import { LayoutDashboard, Users, IdCard, ClipboardList, ListChecks } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { SideNav, type NavItem } from "@/components/side-nav";
@@ -27,16 +28,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-full flex-1 flex-col lg:flex-row">
       <MobileSidebar
         navItems={navItems}
-        session={{ name: session.name, email: session.email, role: session.role }}
+        session={{
+          name: session.name,
+          email: session.email,
+          role: session.role,
+          isTeamLead: session.isTeamLead,
+        }}
       />
 
       <aside className="hidden w-56 shrink-0 flex-col border-r border-border px-3 py-4 lg:sticky lg:top-0 lg:flex lg:h-svh">
         <Link href="/dashboard" className="flex items-center gap-2 px-2 py-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Briefcase className="size-4" />
-          </span>
+          <Image src="/logo-mark.png" alt="" width={28} height={28} className="size-7 shrink-0" />
           <span className="truncate text-sm font-semibold tracking-tight text-foreground">
-            Recruitment CRM
+            Recruiter CRM
           </span>
         </Link>
 

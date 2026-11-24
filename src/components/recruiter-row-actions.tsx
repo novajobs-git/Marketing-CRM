@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
+  AlertDialogClose,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -168,8 +167,8 @@ export function RecruiterRowActions({
           </AlertDialogHeader>
           {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+            <Button
               variant="destructive"
               disabled={pending}
               onClick={() => {
@@ -184,7 +183,7 @@ export function RecruiterRowActions({
               }}
             >
               Remove
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

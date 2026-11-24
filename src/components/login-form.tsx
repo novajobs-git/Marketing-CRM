@@ -126,7 +126,7 @@ export function LoginForm({ next }: { next: string }) {
     return (
       <form onSubmit={handleCodeSubmit} className="flex flex-col gap-6">
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -178,7 +178,7 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <form onSubmit={handleCredentialsSubmit} className="flex flex-col gap-6">
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="error">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

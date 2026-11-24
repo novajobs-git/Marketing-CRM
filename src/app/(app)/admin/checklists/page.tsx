@@ -131,7 +131,6 @@ export default async function ChecklistsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      nativeButton={false}
                       render={<Link href={`/admin/intake/${link.resultingIntakeSubmissionId}`} />}
                     >
                       Review

@@ -201,7 +201,7 @@ export default async function DashboardPage({
           Filter
         </Button>
         {(q || recruiter) && (
-          <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/dashboard" />}>
+          <Button variant="ghost" size="sm" render={<Link href="/dashboard" />}>
             Clear
           </Button>
         )}

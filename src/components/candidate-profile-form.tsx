@@ -38,7 +38,7 @@ export function CandidateProfileForm({
   return (
     <form action={formAction} className="flex flex-col gap-8">
       {state?.error && (
-        <Alert variant="destructive">
+        <Alert variant="error">
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}

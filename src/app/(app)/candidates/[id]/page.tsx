@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsIndicator, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -201,7 +201,6 @@ export default async function CandidateDetailPage({
               <Button
                 variant="outline"
                 size="sm"
-                nativeButton={false}
                 render={<Link href={`/candidates/${candidate.id}/edit`} />}
               >
                 Edit
@@ -219,7 +218,6 @@ export default async function CandidateDetailPage({
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="resume-edits">Resume Edits</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsIndicator />
           </TabsList>
 
           <TabsContent value="details" className="mt-6 flex flex-col gap-6">
@@ -295,7 +293,6 @@ export default async function CandidateDetailPage({
                     <div className="flex shrink-0 items-center gap-1">
                       <Button
                         size="sm"
-                        nativeButton={false}
                         render={<a href={`/api/resumes/${resume.id}`} target="_blank" rel="noreferrer" />}
                       >
                         View PDF
@@ -373,7 +370,6 @@ export default async function CandidateDetailPage({
                 {canManage && (
                   <Button
                     size="sm"
-                    nativeButton={false}
                     render={<Link href={`/candidates/${candidate.id}/applications/new`} />}
                   >
                     <Plus />
@@ -401,7 +397,6 @@ export default async function CandidateDetailPage({
                 <Button
                   variant="ghost"
                   size="sm"
-                  nativeButton={false}
                   render={<Link href={`/candidates/${id}?tab=resume-edits`} />}
                 >
                   Clear
@@ -488,7 +483,6 @@ export default async function CandidateDetailPage({
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        nativeButton={false}
                         render={<Link href={resumeEditsHref(resumeEditsPage - 1)} aria-label="Previous page" />}
                       >
                         <ChevronLeft />
@@ -504,7 +498,6 @@ export default async function CandidateDetailPage({
                           key={p}
                           variant={p === resumeEditsPage ? "default" : "ghost"}
                           size="icon-sm"
-                          nativeButton={false}
                           render={<Link href={resumeEditsHref(p)} />}
                         >
                           {p}
@@ -519,7 +512,6 @@ export default async function CandidateDetailPage({
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        nativeButton={false}
                         render={<Link href={resumeEditsHref(resumeEditsPage + 1)} aria-label="Next page" />}
                       >
                         <ChevronRight />
@@ -540,7 +532,6 @@ export default async function CandidateDetailPage({
                 <Button
                   variant="outline"
                   size="sm"
-                  nativeButton={false}
                   render={<Link href={`/candidates/${candidate.id}/reports`} />}
                 >
                   View full reports

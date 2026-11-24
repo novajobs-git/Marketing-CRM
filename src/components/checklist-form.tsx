@@ -190,7 +190,7 @@ export function ChecklistForm({ token, fields }: { token: string; fields: FieldD
       </div>
 
       {state?.error && (
-        <Alert variant="destructive">
+        <Alert variant="error">
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}

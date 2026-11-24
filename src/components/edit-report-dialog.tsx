@@ -60,7 +60,7 @@ export function EditReportDialog({
 
         <form ref={formRef} action={formAction} className="flex flex-col gap-6">
           {state?.error && (
-            <Alert variant="destructive">
+            <Alert variant="error">
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           )}
