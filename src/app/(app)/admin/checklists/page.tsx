@@ -36,14 +36,14 @@ export default async function ChecklistsPage() {
 
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">Checklists</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             One-time links that bring a new candidate into the CRM — they fill it out themselves.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <CreateChecklistLinkDialog templates={templates.map((t) => ({ id: t.id, name: t.name }))} />
           <CreateChecklistTemplateDialog />
         </div>

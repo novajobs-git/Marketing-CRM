@@ -47,8 +47,10 @@ export const config = {
     /*
      * Match all paths except:
      * - Next internals (_next/static, _next/image)
-     * - static files (images, fonts, favicon, etc.)
+     * - static files (images, fonts, favicon, the PWA manifest, etc.) — the
+     *   manifest in particular must be fetchable unauthenticated, or Chrome
+     *   /Android never recognizes the site as an installable PWA/TWA.
      */
-    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|css|js|map|woff2?)$).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|css|js|map|woff2?|webmanifest)$).*)",
   ],
 };

@@ -4,8 +4,8 @@ export default function Loading() {
   return (
     <div className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <div className="max-w-3xl">
-        <Skeleton className="h-8 w-72" />
-        <Skeleton className="mt-2 h-4 w-80" />
+        <Skeleton className="h-8 w-full max-w-72" />
+        <Skeleton className="mt-2 h-4 w-full max-w-80" />
 
         <div className="mt-8 rounded-2xl border border-border bg-card p-8 shadow-sm">
           <div className="flex flex-col gap-5">

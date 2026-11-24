@@ -140,7 +140,7 @@ export default async function DashboardPage({
       </p>
 
       {canViewAllRecruiters && (
-        <form className="mt-6 flex items-center gap-2" method="get">
+        <form className="mt-6 flex flex-wrap items-center gap-2" method="get">
           {q && <input type="hidden" name="q" value={q} />}
           <label htmlFor="recruiter" className="text-sm text-muted-foreground">
             Viewing
